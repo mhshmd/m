@@ -165,9 +165,9 @@
 
             <!--Timer-->
             @if($time!="noTime")
-                <div class="col-md-2" style="border:1px solid green; margin:0;">
-                    <div class="row timer" style="margin : 0 35%;">
-                        <h1 class="alt-2" style="position : fixed; top : 10%;">0h {{$time}}m {{$secon}}s</h1>
+                <div class="col-md-2">
+                    <div class="row timer" style="margin : 0;">
+                        <h1 id="timer" class="alt-2" style="position : fixed; top : 3%; right: 0; width: 100px">0h {{$time}}m {{$secon}}s</h1>
                     </div>
                     <div class="row text-center">
                         <a class="btn btn-default btn-outline" style="position : fixed; top : 80%; right: 1%" href="#" class="back-to-top" title="Scroll ke atas">
@@ -176,12 +176,12 @@
                     </div>
                     <div class="row text-center">
                         <a class="btn btn-default btn-outline hideTimer" style="position : fixed; top : 86%; right: 1%" title="Sembunyikan jam">
-                            Show/Hide Timer
+                            Sembunyikan jam
                         </a>
                     </div>
                     <div class="row text-center">
-                        <a class="btn btn-info btn-outline" style="position : fixed; top : 92%; right: 1%"  data-target="#finishModal" data-toggle="modal" data-placement="top" title="Kumpul hasil ujian.">
-                            <span class="fa fa-check"></span> SELESAI</i>
+                        <a class="btn btn-info btn-outline btn-lg" style="position : fixed; top : 92%; right: 1%"  data-target="#finishModal" data-toggle="modal" data-placement="top" title="Kumpul hasil ujian.">
+                            <span class="fa fa-check"></span> Selesai</i>
                         </a>
                     </div>                
 
@@ -193,14 +193,14 @@
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                   <span aria-hidden="true">&times;</span>
                                 </button>
-                                <h4 class="modal-title" id="myModalLabel">SELESAI</h4>
+                                <h4 class="modal-title" id="myModalLabel">Selesai</h4>
                               </div>
                               <div class="modal-body">
                                 <p>Selesai dan Lihat Hasil Ujian?</p>
                               </div>
                               <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">BATAL</button>
-                                <button type="button" class="btn btn-primary confirmKumpulTO" data-dismiss="modal">YA</button>
+                                <button type="button" class="btn btn-default btn-outline" data-dismiss="modal">Kembali</button>
+                                <button type="button" class="btn btn-info confirmKumpulTO btn-outline" style="width: 98px" data-dismiss="modal">YA</button>
                               </div>
                             </div>
                           </div>
