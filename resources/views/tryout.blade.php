@@ -249,7 +249,7 @@
     <script type="text/javascript" src={{url("js/jquery.countdown.min.js")}}></script>
 
     <script type="text/x-mathjax-config">
-        MathJax.Hub.Config({showMathMenu: false, tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}, messageStyle: 'none', jax: ["input/TeX","output/SVG"], CommonHTML: { linebreaks: { automatic: true } }, "HTML-CSS": { linebreaks: { automatic: true } },
+        MathJax.Hub.Config({showMathMenu: false, tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}, messageStyle: 'none', CommonHTML: { linebreaks: { automatic: true } }, "HTML-CSS": { linebreaks: { automatic: true } },
          SVG: { linebreaks: { automatic: true } }});
         if (MathJax.Hub.Browser.isMSIE && (document.documentMode||0) < 9) {
           MathJax.Hub.Register.StartupHook("End Config",function () {
