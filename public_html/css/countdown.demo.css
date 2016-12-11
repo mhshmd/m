@@ -1,0 +1,51 @@
+#content {
+    width: 90%;
+    margin: 0 auto 100px auto;
+}
+/* COUNTDOWN-ALT-2 - Inspiration http://goo.gl/hRfsc */
+/* ----------------------------------------------------------------------------------------- */
+.countdown-alt-2 {
+    font-size: 0;  /* Hack for inline and inline-block extra markup generated spaces */
+    display: block;
+    overflow: auto;
+    padding: 20px 0;
+    margin: 50px 0;
+    font-family: 'Trebuchet MS', 'Lucida Grande', Verdana, Arial, Sans-Serif;
+    color: #333;
+}
+.countdown-alt-2 .item {
+    display: block;
+    float: left;
+    position: relative;
+    font-size: 20px;
+    font-weight: bold;
+    padding: 36px 20px 10px 20px;
+    margin: 0 10px;
+    min-width: 80px;
+    max-width: 100px;
+    text-align: center;
+    background: #FFF;
+    border: 2px solid #FFF;
+    box-shadow: 10px 10px 10px 1px rgba(0, 0, 0, 0.2);
+}
+.countdown-alt-2 .dd,
+.countdown-alt-2 .hh-1,
+.countdown-alt-2 .hh-2,
+.countdown-alt-2 .mm-1,
+.countdown-alt-2 .mm-2,
+.countdown-alt-2 .ss-1,
+.countdown-alt-2 .ss-2 {
+    font: italic;
+    text-shadow: 1px 1px 10px #FFF, 1px 1px 3px #333;
+}
+.countdown-alt-2 .label {
+    font-weight: normal;
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 14px;
+    width: 80px;
+    padding: 5px 10px;
+    background: #0B81BC;
+    color: #FFF;
+}

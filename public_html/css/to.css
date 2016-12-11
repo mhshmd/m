@@ -1,0 +1,42 @@
+.pagenumber
+{
+    font-family: 'Arial';
+    font-size: 13px;
+
+    margin-top: 30pt;
+}
+label
+{
+    font-weight: normal !important;
+}
+.sizeSet
+{
+    max-width: 500px;
+    max-height: 500px;
+}
+.check
+{
+    color: #1bd622;
+}
+.cross
+{
+    color: red;
+}
+.sembarang
+{
+    color: orange;
+}
+table,
+th,
+td
+{
+    border-collapse: collapse;
+
+    border: 1px solid black;
+}
+img
+{
+    display: block;
+
+    margin: 0 auto;
+}
