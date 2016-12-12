@@ -4,6 +4,7 @@
 
 @section('customCSS')
     <link href={{url("css/metisMenu.min.css")}} rel="stylesheet">
+    <link href={{url("css/countdown.demo.css")}} rel="stylesheet">
 @stop
 
 @section('body')
