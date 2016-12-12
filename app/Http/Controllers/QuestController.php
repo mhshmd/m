@@ -1075,11 +1075,19 @@ class QuestController extends Controller
             'engSubMaterialName'=>$engSubMaterialName, 'engTO'=>$engTO, 'mathTO'=>$mathTO]);
     }
 
-    public function latihanNow(Request $request, $sub, $id)
+    public function replacePng()
     {
         //AMBIL SEMUA INPUT
-        $inputs = $request->all();
-
-        return view('latihanNow');
+        $path    = '\\xampp\\htdocs\\blog\\public_html\\upload\\qPictPath';
+        $files = scandir($path);
+        $files = array_diff(scandir($path), array('.', '..'));
+        foreach ($files as $key => $img) {
+            if(preg_match_all("/png/i", $img, $match)){
+                continue;
+            }
+            $name = preg_replace("/jpg/i", "png", $img);
+            Quest::where([['qPictPath', $name]])->update(['qPictPath'=>$img]);
+        }
+        return $files;
     }
 }

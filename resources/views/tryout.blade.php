@@ -141,7 +141,7 @@
                                         {!!$quest->text!!}
                                         @if($quest->qPictPath!==null)
                                             <br>
-                                            <img SRC="data:image/png;base64,<?php echo base64_encode(file_get_contents("upload/qPictPath/".$quest->qPictPath)) ?>" class="sizeSet img-responsive">
+                                            <img SRC="data:image/jpg;base64,<?php echo base64_encode(file_get_contents("upload/qPictPath/".$quest->qPictPath)) ?>" class="sizeSet img-responsive">
                                         @endif
                                         <ol type="A">
                                             @if($time!="noTime")
@@ -227,15 +227,16 @@
                 </div>
             @else
                 <div class="col-md-2">
-                    <div class="row" style="padding : 0 50%;">
-                        <a class="btn btn-default btn-outline" style="position : fixed; top : 84%; right: 1%"   href="#" class="back-to-top" title="Scroll ke atas">
-                            <span class="fa fa-arrow-up"></span> Ke atas</i>
-                        </a>
-                    </div>
-                    <div class="row" style="padding : 0 50%;">
-                        <a class="btn btn-default btn-outline" style="position : fixed; top : 92%; right: 1%"   href="{{url('/profile')}}" title="Kembali ke Profil">
-                            <span class="fa fa-mail-reply"></span> Kembali</i>
-                        </a>
+                    <div style="width: 200px; position : fixed; top : 77%; right: 3%;padding-left: 155px">
+                        <div class="row">
+                            <a class="btn btn-default btn-outline hideTimer btn-circle btn-lg tombolto" data-placement="left" href="{{url('/profile')}}" title="Kembali ke Profil"><i class="fa fa-mail-reply"></i>
+                            </a>
+                        </div>
+                        <div class="row">
+                            <a class="btn btn-default btn-outline btn-circle btn-lg tombolto" href="#" id="back-to-top" data-placement="left" title="Scroll ke atas">
+                                <i class="fa fa-chevron-up"></i>
+                            </a>
+                        </div>
                     </div>
                 </div>
             @endif
@@ -445,6 +446,21 @@
                     }
                 }
             });
+        </script>
+        <script type="text/javascript">
+            $('#back-to-top').click(function(){
+                    $("body").animate({scrollTop:0});
+                });
+            $(window).scroll(function() {
+                if ($(this).scrollTop() > 1000) {
+                    $('#back-to-top').fadeIn(1000);
+                } else {
+                    $('#back-to-top').fadeOut(1000);
+                }
+            });
+            $(function () {
+              $('[data-placement]').tooltip()
+            })
         </script>
     @endif
 @stop

@@ -13,6 +13,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
+//Route::get('/replacePng', 'QuestController@replacePng');
+
 Route::get('/', 'HomeController@index')->name('home');
 Route::get('/monitor', 'HomeController@monitor');
 Route::get('/test', function () {
