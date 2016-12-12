@@ -67,7 +67,7 @@
         </nav>
         @yield('mainBody')
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src={{url("js/bootstrap.min.js")}}></script>
     <script src={{url("js/sb-admin-2.min.js")}}></script>
     @yield('customJS')
 </body>
