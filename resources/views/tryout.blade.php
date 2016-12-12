@@ -15,11 +15,28 @@
         .sembarang {color:orange;}
         table, th, td {border: 1px solid black;border-collapse: collapse;}
         img {display: block; margin: 0 auto;}
+        .tombolto{margin: 7px 0;}
     </style>
 @stop
 
 @section('customCSS')
     <link rel="stylesheet" href={{url("css/countdown.demo.css")}} type="text/css">
+@stop
+
+@section('customJSup')
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({showMathMenu: false, tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}, messageStyle: 'none', CommonHTML: { linebreaks: { automatic: true } }, "HTML-CSS": { linebreaks: { automatic: true } },
+         SVG: { linebreaks: { automatic: true } }});
+        if (MathJax.Hub.Browser.isMSIE && (document.documentMode||0) < 9) {
+          MathJax.Hub.Register.StartupHook("End Config",function () {
+            var settings = MathJax.Hub.config.menuSettings;
+            if (!settings.renderer) {settings.renderer = "HTML-CSS"}
+          });
+        }
+    </script>
+    <script type="text/javascript" async
+          src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_CHTML">
+    </script>
 @stop
 
 @section('body')
@@ -167,23 +184,24 @@
             @if($time!="noTime")
                 <div class="col-md-2">
                     <div class="row timer" style="margin : 0;">
-                        <h1 id="timer" class="alt-2" style="position : fixed; top : 3%; right: 0; width: 100px">0h {{$time}}m {{$secon}}s</h1>
+                        <h1 id="timer" class="alt-2" style="position : fixed; top : 3%; right: 1.5%; width: 100px">0h {{$time}}m {{$secon}}s</h1>
                     </div>
-                    <div class="row text-center">
-                        <a class="btn btn-default btn-outline" style="position : fixed; top : 80%; right: 1%" href="#" class="back-to-top" title="Scroll ke atas">
-                            <span class="fa fa-arrow-up"></span> Ke atas</i>
-                        </a>
+                    <div style="width: 200px; position : fixed; top : 67%; right: 3%;padding-left: 155px">
+                        <div class="row">
+                            <a class="btn btn-default btn-outline hideTimer btn-circle btn-lg tombolto" data-placement="left" title="Sembunyikan waktu"><i class="fa fa-clock-o"></i>
+                            </a>
+                        </div>
+                        <div class="row">
+                            <a class="btn btn-info btn-circle btn-lg btn-outline tombolto" data-target="#finishModal" data-toggle="modal" data-placement="left" title="Kumpul hasil ujian">
+                                <i class="fa fa-check"></i>
+                            </a>
+                        </div>
+                        <div class="row">
+                            <a class="btn btn-default btn-outline btn-circle btn-lg tombolto" href="#" id="back-to-top" data-placement="left" title="Scroll ke atas">
+                                <i class="fa fa-chevron-up"></i>
+                            </a>
+                        </div>
                     </div>
-                    <div class="row text-center">
-                        <a class="btn btn-default btn-outline hideTimer" style="position : fixed; top : 86%; right: 1%" title="Sembunyikan jam">
-                            Sembunyikan jam
-                        </a>
-                    </div>
-                    <div class="row text-center">
-                        <a class="btn btn-info btn-outline btn-lg" style="position : fixed; top : 92%; right: 1%"  data-target="#finishModal" data-toggle="modal" data-placement="top" title="Kumpul hasil ujian.">
-                            <span class="fa fa-check"></span> Selesai</i>
-                        </a>
-                    </div>                
 
                         <!-- Modal -->
                         <div class="modal fade" id="finishModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -247,21 +265,6 @@
 
 @section('customJS')
     <script type="text/javascript" src={{url("js/jquery.countdown.min.js")}}></script>
-
-    <script type="text/x-mathjax-config">
-        MathJax.Hub.Config({showMathMenu: false, tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}, messageStyle: 'none', CommonHTML: { linebreaks: { automatic: true } }, "HTML-CSS": { linebreaks: { automatic: true } },
-         SVG: { linebreaks: { automatic: true } }});
-        if (MathJax.Hub.Browser.isMSIE && (document.documentMode||0) < 9) {
-          MathJax.Hub.Register.StartupHook("End Config",function () {
-            var settings = MathJax.Hub.config.menuSettings;
-            if (!settings.renderer) {settings.renderer = "HTML-CSS"}
-          });
-        }
-
-    </script>
-    <script type="text/javascript" async
-          src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_CHTML">
-    </script>
 
     @if($time!="noTime")
         <script>

@@ -27,8 +27,19 @@ $('.alt-2').on('time.elapsed', function () {
     }, 4500);
 });
 $(function () {
-      $('[data-toggle="modal"]').tooltip()
+      $('[data-placement]').tooltip()
     })
 $(window).bind('beforeunload', function(){
   return 'Hasil tryout belum disubmit. Tetap tinggalkan?';
+});
+
+$('#back-to-top').click(function(){
+    $("body").animate({scrollTop:0});
+});
+$(window).scroll(function() {
+    if ($(this).scrollTop() > 1000) {
+        $('#back-to-top').fadeIn(1000);
+    } else {
+        $('#back-to-top').fadeOut(1000);
+    }
 });

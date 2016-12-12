@@ -230,4 +230,11 @@
             window.location.href = basic+idTO;
         });
     </script>
+    <script type="text/javascript" src={{url("js/jquery.countdown.min.js")}}></script>  
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({messageStyle: 'none'});
+    </script>  
+    <script type="text/javascript" async
+          src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_CHTML">
+    </script>
 @stop

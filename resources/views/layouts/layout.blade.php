@@ -9,12 +9,14 @@
 
     <title>@yield('title')</title>
 
+    @yield('customJSup')
+
     @yield('customStyleUp')
 
     <link rel="shortcut icon" href="{{url('upload/thumbnail.png')}}">
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link href={{url("css/bootstrap.min.css")}} rel="stylesheet">
     <link href={{url("css/sb-admin-2.min.css")}} rel="stylesheet">
-    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href={{url("css/font-awesome.min.css")}} rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400" rel="stylesheet">
 
     @yield('customCSS')
