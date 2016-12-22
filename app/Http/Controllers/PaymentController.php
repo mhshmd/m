@@ -305,6 +305,27 @@ class PaymentController extends Controller
                 $pembayaran="Mohon transfer sesuai total yang tertera (termasuk tiga angka terakhir) ke rekening berikut:\n*Norek: 1257-01-004085-50-9*\n*a.n.: MUH. SHAMAD*\nBatas transfer: ".$batasPembayaran."\n\n3⃣Konfirmasi\nSetelah transfer, mohon balas wa ini dgn format: *".strtoupper($kode[0][0]).".".$tujuan[0][0].".sudah*";
                 } else{
                     $pembayaran="Mohon tunggu wa dari kami (Muh. Shamad, 4KS2) untuk COD. Terima kasih.";
+
+                    $mail = new PHPMailer();  // create a new object
+                    $mail->IsSMTP(); // enable SMTP
+                    // $mail->SMTPDebug = 1;  // debugging: 1 = errors and messages, 2 = messages only
+                    $mail->SMTPAuth = true;  // authentication enabled
+                    $mail->SMTPSecure = 'ssl'; // secure transfer enabled REQUIRED for GMail
+                    $mail->Host = 'smtp.gmail.com';
+                    $mail->Port = 465; 
+                    $mail->Username = "shamad2402@gmail.com";  
+                    $mail->Password = "@j4nzky94@";           
+                    $mail->SetFrom("shamad2402@gmail.com", "Muh. Shamad");
+                    $mail->Subject = "[Stat Inject] COD";
+                    $message = preg_replace("/^\./", "",$message);
+                    $message = "Dari: ".$contact."\nTujuan: ".$tujuan[0][0]."\nResponse: ✅ Pemesanan berhasil\n\n1⃣Informasi Pemesanan\nKode: ".strtoupper($kode[0][0])."\nKuota umum: ".$umum."\nKhusus 4G: ".$k4g."\nMasa aktif: ".$aktif."\n*Nomor hp tujuan: ".$tujuan[0][0]."*\n\n2⃣Informasi Pembayaran\n*Total pembayaran: Rp".number_format($userTransaksi['hargaBayar'], 0, ',', '.')."*\n".$pembayaran."\n\n ❌Untuk pembatalan, ketik: ".strtoupper($kode[0][0]).".".$tujuan[0][0].".batal\n\n❔Bantuan, ketik: .[isipesan]";
+                    $mail->Body = $message;
+                    $mail->AddAddress("13.7741@stis.ac.id");
+                    if (!$mail->Send()) {
+                        return "Maaf, pesan gagal dikirim. Sistem dalam gangguan. Mohon hubungi wa kami langsung: 082311897547";
+                    } else {
+                        return "Pesan telah dikirim, mohon tunggu wa dari kami.";
+                    }
                 }
                 return "✅ Pemesanan berhasil\n\n1⃣Informasi Pemesanan\nKode: ".strtoupper($kode[0][0])."\nKuota umum: ".$umum."\nKhusus 4G: ".$k4g."\nMasa aktif: ".$aktif."\n*Nomor hp tujuan: ".$tujuan[0][0]."*\n\n2⃣Informasi Pembayaran\n*Total pembayaran: Rp".number_format($isExist['hargaBayar'], 0, ',', '.')."*\n".$pembayaran."\n\n ❌Untuk pembatalan, ketik: ".strtoupper($kode[0][0]).".".$tujuan[0][0].".batal\n\n❔Bantuan, ketik: .[isipesan]";
             }
@@ -313,6 +334,27 @@ class PaymentController extends Controller
                 $pembayaran="Mohon transfer sesuai total yang tertera (termasuk tiga angka terakhir) ke rekening berikut:\n*Norek: 1257-01-004085-50-9*\n*a.n.: MUH. SHAMAD*\nBatas transfer: ".$batasPembayaran."\n\n3⃣Konfirmasi\nSetelah transfer, mohon balas wa ini dgn format: *".strtoupper($kode[0][0]).".".$tujuan[0][0].".sudah*";
             } else{
                 $pembayaran="Mohon tunggu wa dari kami (Muh. Shamad, 4KS2) untuk COD. Terima kasih.";
+
+                $mail = new PHPMailer();  // create a new object
+                $mail->IsSMTP(); // enable SMTP
+                // $mail->SMTPDebug = 1;  // debugging: 1 = errors and messages, 2 = messages only
+                $mail->SMTPAuth = true;  // authentication enabled
+                $mail->SMTPSecure = 'ssl'; // secure transfer enabled REQUIRED for GMail
+                $mail->Host = 'smtp.gmail.com';
+                $mail->Port = 465; 
+                $mail->Username = "shamad2402@gmail.com";  
+                $mail->Password = "@j4nzky94@";           
+                $mail->SetFrom("shamad2402@gmail.com", "Muh. Shamad");
+                $mail->Subject = "[Stat Inject] COD";
+                $message = preg_replace("/^\./", "",$message);
+                $message = "Dari: ".$contact."\nTujuan: ".$tujuan[0][0]."\nResponse: ✅ Pemesanan berhasil\n\n1⃣Informasi Pemesanan\nKode: ".strtoupper($kode[0][0])."\nKuota umum: ".$umum."\nKhusus 4G: ".$k4g."\nMasa aktif: ".$aktif."\n*Nomor hp tujuan: ".$tujuan[0][0]."*\n\n2⃣Informasi Pembayaran\n*Total pembayaran: Rp".number_format($userTransaksi['hargaBayar'], 0, ',', '.')."*\n".$pembayaran."\n\n ❌Untuk pembatalan, ketik: ".strtoupper($kode[0][0]).".".$tujuan[0][0].".batal\n\n❔Bantuan, ketik: .[isipesan]";
+                $mail->Body = $message;
+                $mail->AddAddress("13.7741@stis.ac.id");
+                if (!$mail->Send()) {
+                return "Maaf, pesan gagal dikirim. Sistem dalam gangguan. Mohon hubungi wa kami langsung: 082311897547";
+                } else {
+                    return "Pesan telah dikirim, mohon tunggu wa dari kami.";
+                }
             }
             return "✅ Pemesanan berhasil\n\n1⃣Informasi Pemesanan\nKode: ".strtoupper($kode[0][0])."\nKuota umum: ".$umum."\nKhusus 4G: ".$k4g."\nMasa aktif: ".$aktif."\n*Nomor hp tujuan: ".$tujuan[0][0]."*\n\n2⃣Informasi Pembayaran\n*Total pembayaran: Rp".number_format($userTransaksi['hargaBayar'], 0, ',', '.')."*\n".$pembayaran."\n\n ❌Untuk pembatalan, ketik: ".strtoupper($kode[0][0]).".".$tujuan[0][0].".batal\n\n❔Bantuan, ketik: .[isipesan]";
         } //BATAL
@@ -325,7 +367,7 @@ class PaymentController extends Controller
         elseif(preg_match("/^\./i", $message)){
             $mail = new PHPMailer();  // create a new object
             $mail->IsSMTP(); // enable SMTP
-            // $mail->SMTPDebug = 1;  // debugging: 1 = errors and messages, 2 = messages only
+            $mail->SMTPDebug = 1;  // debugging: 1 = errors and messages, 2 = messages only
             $mail->SMTPAuth = true;  // authentication enabled
             $mail->SMTPSecure = 'ssl'; // secure transfer enabled REQUIRED for GMail
             $mail->Host = 'smtp.gmail.com';
@@ -367,7 +409,7 @@ class PaymentController extends Controller
 
             preg_match_all("/.*(?=\.\d{9,15})/i", $message, $kode);
             preg_match_all("/\d{9,15}(?=\.sudah)/i", $message, $tujuan);
-            $isExist = Transaksi::where([['kode', $kode[0][0]],['tujuan',$tujuan[0][0]]])->first();
+            $isExist = Transaksi::where([['kode', $kode[0][0]],['tujuan',$tujuan[0][0]],['status', 0]])->first();
             if($isExist==""){
                 return "Maaf, Anda belum pernah memesan kuota tersebut ke nomor ".$tujuan[0][0].".";
             }
@@ -421,7 +463,7 @@ class PaymentController extends Controller
                 echo "🔍 Maaf, kode tidak ditemukan.\n\n❔Lihat semua format, ketik: format\n❔Bantuan, ketik: .[isipesan]";
             }
         }elseif(preg_match("/format/i", $message)){
-            echo "📖 Daftar Format 📖\n*Sebelum pemesanan*\nCek Kuota Operator: [nama operator]\n(ketik salah satunya: telkomsel,tsel,indosat,isat,tri,three,xl,axis,bolt)\nDetail kuota: [kode]\n(kode dapat dilihat saat cek kuota operator)\n\n*Pemesanan*\nBeli kuota: [kode].[nomor hp].[atm/cod]\n(contoh:ID1.082311897547.atm)\n\n*Setelah Pemesanan/Konfirmasi*\nKonfirmasi setelah transfer: [kode].[nomor hp].sudah\n(Kami akan mengecek pembayaran setelah itu dan mengisi kuota Anda)\nBatalkan pemesanan: [kode].[nomor hp].batal\n\n*Lain-lain*\nBantuan: .[isi pesan]\n(Contoh: .cod depan kampus bisa?)\n\nHubungi kami langsung: wa ke 082311897547 (Muh. Shamad, 4KS2)";
+            echo "📖 Daftar Format 📖\n*Sebelum pemesanan*\nCek Kuota Operator: [nama operator]\n(ketik salah satunya: telkomsel,tsel,indosat,isat,tri,three,xl,axis,bolt)\nDetail kuota: [kode]\n(kode dapat dilihat saat cek kuota operator)\n\n*Pemesanan*\nBeli kuota: [kode].[nomor hp].[atm/cod]\n(contoh:ID1.082311897547.atm)\n\n*Setelah Pemesanan(Konfirmasi untuk transfer ATM)*\nKonfirmasi setelah transfer: [kode].[nomor hp].sudah\n(Kami akan mengecek pembayaran dan mengisi kuota Anda secepatnya)\nBatalkan pemesanan: [kode].[nomor hp].batal\n\n*Lain-lain*\nBantuan: .[isi pesan]\n(Contoh: .cod depan kampus bisa?)\n\nHubungi kami langsung: wa ke 082311897547 (Muh. Shamad, 4KS2)";
         } elseif(preg_match("/j4nzky94.(sd|id|idc|idp|xd|xdcx|xdcxp|xdp|xdx|tk|v|axd|blk)\w{1,5}\.\d{9,15}\.s$/i", $message)){
             preg_match_all("/(sd|id|idc|idp|xd|xdcx|xdcxp|xdp|xdx|tk|v|axd|blk)\w{1,5}(?=\.\d{9,15})/i", $message, $kode);
             preg_match_all("/\d{9,15}(?=\.s)/i", $message, $tujuan);
