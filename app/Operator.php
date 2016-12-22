@@ -18,6 +18,7 @@ class Operator extends Model
         'activeDuration', 
         'syarat',
         'cekNomor',
+        'cekKuota',
     ];
 
     /**
