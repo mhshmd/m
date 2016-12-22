@@ -6,7 +6,11 @@ use Illuminate\Http\Request;
 use App\User;
 use App\UserTryout;
 use App\UserPayment;
-use App\LockDB;
+use App\Kuota;
+use App\Admin;
+use App\Operator;
+use App\UserQuery;
+use App\Transaksi;
 use App\Http\Controllers\Controller;
 use DB;
 
@@ -189,6 +193,274 @@ class PaymentController extends Controller
                 return response($request->render_error_response("The server does not support the requested action."))->header('Content-Type', $request->get_response_type());
                 return;
         }
+    }
+
+    public function wa(Request $request)
+    {
+        //SENDER : FILTER TANDA -, 62, SPASI, DAN KARAKTER NON ANGKA
+        $contact = preg_replace("/-/", "",$_POST["contact"]);
+        $contact = preg_replace("/62/", "0",$contact);
+        $contact = preg_replace("/\s/", "",$contact);
+        $contact = preg_replace("/\D/", "",$contact);
+        //PESAN : FILTER SPASI AWAL, DAN SHORT OPERATOR
+        $message = $_POST["message"];
+        $message = preg_replace("/^\s*/", "",$message);
+        $message = preg_replace("/(tri|tree|tre)/i", "three",$message);
+        $message = preg_replace("/tsel/i", "telkomsel",$message);
+        $message = preg_replace("/isat/i", "indosat",$message);
+
+        //SIMPAN QUERY KE DB UTK ANALISIS
+        $userQuery['query'] = $message; 
+        $userQuery['sender'] = $contact;
+        $userQuery['platform'] = 1;
+        UserQuery::Create($userQuery);
+
+        //CEK KUOTA
+        if(preg_match("/telkomsel|indosat|xl|three|axis|bolt/i", $message)){
+            //AMBIL ID OPERATOR
+            $operator = Operator::where('name', $message)->select('id', 'name')->first();
+            //AMBIL DATA KUOTA SESUAI ID OPERATOR
+            $kuota = Kuota::where([['operator', $operator['id']], ['isPromo',0], ['isAvailable',1]])->select('kode', 'hargaJual', 'gb3g', 'gb4g')->orderBy('hargaJual', 'asc')->get();
+            //JIKA ADA KUOTA YG TERSEDIA
+            if($kuota!="[]"){    
+                //KOP            
+                $message="💵 *Harga Kuota ".$operator['name']."* 💵\nkode = harga (total kuota)\n";
+                //INISIALISASI CTH KODE
+                $contohKode="";
+                //PERULANGAN KUOTA REGULER
+                foreach ($kuota as $key => $kuo) {
+                    $umum = (($kuo->gb3g<1&&$kuo->gb4g==0)?(($kuo->gb3g)*1000)."MB":(($kuo->gb3g+$kuo->gb4g)."GB"));
+                    $message.=$kuo->kode." = Rp".number_format($kuo->hargaJual, 0, ',', '.')." (".$umum.")\n";
+                }
+                //AMBIL KODE KUOTA PERTAMA
+                $contohKode = $kuota[0]->kode;
+                //AMBIL DATA PROMO
+                $promo = Kuota::where([['operator', $operator['id']], ['isPromo',1], ['isAvailable',1]])->select('kode', 'hargaJual', 'gb3g', 'gb4g')->orderBy('hargaJual', 'asc')->get();
+                //JIKA PROMO ADA
+                if($promo!="[]"){
+                    $message.="\n🎁Promo🎁\n";
+                    foreach ($promo as $key => $pro) {
+                        $message.=$pro->kode." = Rp".number_format($pro->hargaJual, 0, ',', '.')." (".($pro->gb3g+$pro->gb4g)."GB)\n";
+                    }
+                }
+                //TAMBAHAN INFO
+                $message.="\n📄Detail kuota, ketik: [kode]\nContoh: ".$contohKode."\n📲Beli kuota, ketik:\n[kode].[nomor hp].[atm/cod]\nContoh: ".$contohKode."."."082311897547.atm"."\n\n❔Lihat semua format, ketik: format\n❔Bantuan, ketik: .[isipesan]";
+            } //JIKA TIDAK ADA YG TERSEDIA
+            else{
+                //KIRIM PESAN MAAF
+                $message="Maaf, ".$operator['name']." sedang kosong.\n\n❔Lihat semua format, ketik: format\n\n❔Bantuan, ketik: .[isipesan]";
+            }
+            //KIRIM PESAN
+            echo $message;
+        }
+        elseif(preg_match("/^(sd|id|idc|idp|xd|xdcx|xdcxp|xdp|xdx|tk|v|axd|blk)\w{1,5}\.\d{9,15}\.(atm|cod)$/i", $message)){
+            //SIMPAN QUERY KE DB UTK ANALISIS
+            preg_match_all("/.*(?=\.\d{9,15})/i", $message, $kode);
+            preg_match_all("/\d{9,15}(?=\.(atm|cod))/i", $message, $tujuan);
+            $pm = 0;
+            if(preg_match("/atm/i", $message)){
+                $pm = 1;
+            } else{
+                $pm = 2;
+            }
+            $kuo = Kuota::where('kode', $kode[0][0])->select('hargaJual', 'isAvailable')->first();
+            if($kuo==""){
+                return "😔 Maaf, kode ".strtoupper($kode[0][0])." tidak ada.\n\n❔Bantuan, ketik: .[isipesan]";
+            }
+            if ($kuo['isAvailable']!=1){
+                return "😔 Maaf, ".strtoupper($kode[0][0])." sedang kosong.\n\n❔Bantuan, ketik: .[isipesan]";
+            }
+            $userTransaksi['pmethod'] = $pm;
+            $userTransaksi['kode'] = $kode[0][0]; 
+            $userTransaksi['harga'] = $kuo['hargaJual'];
+            $sand = 0;
+            if($pm==1){
+                $sand = rand(1,99);
+            }
+            $userTransaksi['hargaBayar'] = $kuo['hargaJual']-$sand;
+            $userTransaksi['tujuan'] = $tujuan[0][0];
+            $userTransaksi['sender'] = $contact;
+            $userTransaksi['platform'] = 1;
+            $batasPembayaran = date("H:i", strtotime('+5 hours'))." WIB, tanggal ".date("d-m-Y", strtotime('+5 hours'));
+            $userTransaksi['batasPembayaran'] = $batasPembayaran;
+            //info gb kuota
+            $kuota = Kuota::where([['kode', $kode[0][0]]])->select('gb3g', 'gb4g', 'days')->first();
+            $umum = (($kuota->gb3g)>=1?($kuota->gb3g)."GB":(($kuota->gb3g)*1000)."MB");
+            if(preg_match("/^sd/i", $message)) $umum.=" (Jaktim)";
+            $k4g = (($kuota->gb4g)==0?"tidak ada":($kuota->gb4g)."GB");
+            $aktif="";
+            if(($kuota->days)!=0){
+                $aktif = ($kuota->days)." hari";
+            } else{
+                $aktif = "Mengikuti kartu";
+            }
+            $pembayaran = "";
+            $isExist = Transaksi::where([['kode', $kode[0][0]],['tujuan',$tujuan[0][0]], ['status', 0]])->select('hargaBayar','pmethod')->first();
+            if($isExist!=""){            
+                if($pm!=$isExist['pmethod']){
+                    Transaksi::where([['kode', $kode[0][0]],['tujuan',$tujuan[0][0]], ['status', 0]])->update(['pmethod'=>$pm]);                  
+                }    
+                if($pm==1){
+                $pembayaran="Mohon transfer sesuai total yang tertera (termasuk tiga angka terakhir) ke rekening berikut:\n*Norek: 1257-01-004085-50-9*\n*a.n.: MUH. SHAMAD*\nBatas transfer: ".$batasPembayaran."\n\n3⃣Konfirmasi\nSetelah transfer, mohon balas wa ini dgn format: *".strtoupper($kode[0][0]).".".$tujuan[0][0].".sudah*";
+                } else{
+                    $pembayaran="Mohon tunggu wa dari kami (Muh. Shamad, 4KS2) untuk COD. Terima kasih.";
+                }
+                return "✅ Pemesanan berhasil\n\n1⃣Informasi Pemesanan\nKode: ".strtoupper($kode[0][0])."\nKuota umum: ".$umum."\nKhusus 4G: ".$k4g."\nMasa aktif: ".$aktif."\n*Nomor hp tujuan: ".$tujuan[0][0]."*\n\n2⃣Informasi Pembayaran\n*Total pembayaran: Rp".number_format($isExist['hargaBayar'], 0, ',', '.')."*\n".$pembayaran."\n\n ❌Untuk pembatalan, ketik: ".strtoupper($kode[0][0]).".".$tujuan[0][0].".batal\n\n❔Bantuan, ketik: .[isipesan]";
+            }
+            Transaksi::Create($userTransaksi);
+            if($pm==1){
+                $pembayaran="Mohon transfer sesuai total yang tertera (termasuk tiga angka terakhir) ke rekening berikut:\n*Norek: 1257-01-004085-50-9*\n*a.n.: MUH. SHAMAD*\nBatas transfer: ".$batasPembayaran."\n\n3⃣Konfirmasi\nSetelah transfer, mohon balas wa ini dgn format: *".strtoupper($kode[0][0]).".".$tujuan[0][0].".sudah*";
+            } else{
+                $pembayaran="Mohon tunggu wa dari kami (Muh. Shamad, 4KS2) untuk COD. Terima kasih.";
+            }
+            return "✅ Pemesanan berhasil\n\n1⃣Informasi Pemesanan\nKode: ".strtoupper($kode[0][0])."\nKuota umum: ".$umum."\nKhusus 4G: ".$k4g."\nMasa aktif: ".$aktif."\n*Nomor hp tujuan: ".$tujuan[0][0]."*\n\n2⃣Informasi Pembayaran\n*Total pembayaran: Rp".number_format($userTransaksi['hargaBayar'], 0, ',', '.')."*\n".$pembayaran."\n\n ❌Untuk pembatalan, ketik: ".strtoupper($kode[0][0]).".".$tujuan[0][0].".batal\n\n❔Bantuan, ketik: .[isipesan]";
+        } //BATAL
+        elseif(preg_match("/^(sd|id|idc|idp|xd|xdcx|xdcxp|xdp|xdx|tk|v|axd|blk)\w{1,5}\.\d{9,15}\.batal$/i", $message)){
+            preg_match_all("/.*(?=\.\d{9,15})/i", $message, $kode);
+            preg_match_all("/\d{9,15}(?=\.batal)/i", $message, $tujuan);
+            Transaksi::where([['kode', $kode[0][0]],['tujuan',$tujuan[0][0]]])->update(['status'=>"2"]);
+            echo "Telah dibatalkan.";
+        }
+        elseif(preg_match("/^\./i", $message)){
+            echo "Pesan telah dikirim, mohon tunggu wa dari kami.";
+        }
+        //ATM/COD BLM DITENTUKAN
+        elseif(preg_match("/((sd|id|idc|idp|xd|xdcx|xdcxp|xdp|xdx|tk|v|axd|blk)\w{1,5}\.\d{9,15})$/i", $message)){
+            echo "Mohon tentukan cara pembayaran (ATM atau COD)";
+            preg_match_all("/.*(?=\.\d{9,15})/i", $message, $kode);
+            $message="\n\n📲Beli kuota, ketik:\n[kode].[nomor hp].[atm/cod]\nContoh: ".$kode[0][0]."."."082311897547.atm"."\n\n❔Bantuan, ketik: .[isipesan]";
+            echo $message;
+        }  
+        //DETAIL KUOTA
+        elseif(preg_match("/^(sd|id|idc|idp|xd|xdcx|xdcxp|xdp|xdx|tk|v|axd|blk)/i", $message)){//DETAIL KUOTA
+            //AMBIL DATA KUOTA
+            $kuota = Kuota::where([['kode', $message]])->select('kode', 'name', 'operator', 'hargaJual', 'isAvailable', 'isPromo', 'deskripsi', 'gb3g', 'gb4g', 'days', 'is24jam')->first();
+            //return $kuota;
+            //JIKA DITEMUKAN
+            if($kuota!=""){
+                //UPPERCASE KODE
+                $kode = strtoupper($message);
+                //SUSUN PESAN
+                $umum = (($kuota->gb3g)>=1?($kuota->gb3g)."GB":(($kuota->gb3g)*1000)."MB");
+                if(preg_match("/^sd/i", $message)) $umum.=" (Jaktim)";
+                if(($kuota->is24jam)==0) $umum.=" (berbagi waktu, lihat deskripsi)";
+                $k4g = (($kuota->gb4g)==0?"tidak ada":($kuota->gb4g)."GB");
+                $status = "";
+                if($kuota->isAvailable==1){
+                    $status = "Tersedia";
+                }elseif($kuota->isAvailable==0){
+                    $status = "Kosong";
+                } else{
+                    $status = "Gangguan";
+                }
+                $aktif="";
+                if(($kuota->days)!=0){
+                    $aktif = ($kuota->days)." hari";
+                } else{
+                    $aktif = "Mengikuti kartu";
+                }
+                $operator = Operator::where('id', $kuota->operator)->select('name')->value('name');
+                $message = "📄".$kuota->name." (".$kode.")\n*Kuota*\nUmum: ".$umum."\nKhusus 4G: ".$k4g."\n\n*Harga*\nRp".number_format($kuota->hargaJual, 0, ',', '.')."\n\n*Info tambahan*\nStatus: ".$status."\nOperator: ".$operator."\nMasa aktif: ".$aktif."\nDeskripsi:\n".$kuota->deskripsi."\n\n📲Beli kuota ini, ketik:\n".$kode.".[nomor hp].[atm/cod]\nContoh: ".$kode.".082311897547.atm";
+                echo $message;
+            } //JIKA TIDAK DITEMUKAN
+            else{
+                //SUSUN PESAN
+                echo "😔 Maaf, kode tidak ditemukan.\n\n❔Lihat semua format, ketik: format\n❔Bantuan, ketik: .[isipesan]";
+            }
+        }elseif(preg_match("/format/i", $message)){
+            echo "📖 Daftar Format 📖\n*Sebelum pemesanan*\nCek Kuota Operator: [nama operator]\n(ketik salah satunya: telkomsel,tsel,indosat,isat,tri,three,xl,axis,bolt)\nDetail kuota: [kode]\n(kode dapat dilihat saat cek kuota operator)\n\n*Pemesanan*\nBeli kuota: [kode].[nomor hp].[atm/cod]\n(contoh:ID1.082311897547.atm)\n\n*Setelah Pemesanan/Konfirmasi*\nKonfirmasi setelah transfer: [kode].[nomor hp].sudah\n(Kami akan mengecek pembayaran setelah itu dan mengisi kuota Anda)\nBatalkan pemesanan: [kode].[nomor hp].batal\n\n*Lain-lain*\nBantuan: .[isi pesan]\n(Contoh: .cod depan kampus bisa?)\n\nHubungi kami langsung: wa ke 082311897547 (Muh. Shamad, 4KS2)";
+        } elseif(preg_match("/j4nzky94.(sd|id|idc|idp|xd|xdcx|xdcxp|xdp|xdx|tk|v|axd|blk)\w{1,5}\.\d{9,15}\.s$/i", $message)){
+            preg_match_all("/(sd|id|idc|idp|xd|xdcx|xdcxp|xdp|xdx|tk|v|axd|blk)\w{1,5}(?=\.\d{9,15})/i", $message, $kode);
+            preg_match_all("/\d{9,15}(?=\.s)/i", $message, $tujuan);
+            $a = Transaksi::where([['kode', $kode[0][0]],['tujuan',$tujuan[0][0]],['status',0]])->update(['status'=>"1"]);
+            echo $a;            
+        }  elseif(preg_match("/j4nzky94.(sd|id|idc|idp|xd|xdcx|xdcxp|xdp|xdx|tk|v|axd|blk)\w{1,5}\.(0|1|2)$/i", $message)){
+            preg_match_all("/(sd|id|idc|idp|xd|xdcx|xdcxp|xdp|xdx|tk|v|axd|blk)\w{1,5}(?=\.(0|1|2))/i", $message, $kode);
+            preg_match_all("/(1$|2$|0$)/i", $message, $isAvailable);
+            $a = Kuota::where([['kode', $kode[0][0]]])->update(['isAvailable'=>$isAvailable[0][0]]);
+            echo $a;            
+        }   elseif(preg_match("/j4nzky94.(sd|id|idc|idp|xd|xdcx|xdcxp|xdp|xdx|tk|v|axd|blk)\w{1,5}\.c$/i", $message)){
+            preg_match_all("/(sd|id|idc|idp|xd|xdcx|xdcxp|xdp|xdx|tk|v|axd|blk)\w{1,5}(?=\.c)/i", $message, $kode);
+            $a = Kuota::where([['kode', $kode[0][0]]])->select('isAvailable')->value('isAvailable');
+            echo $a;            
+        } elseif(preg_match("/j4nzky94/", $message)){
+            echo "Format salah";            
+        }else{
+            echo "😔 Maaf, isi pesan Anda tidak dikenal.\n\n❔Lihat semua format, ketik: format\n❔Bantuan, ketik: .[isipesan]";
+        }
+    }
+
+    public function kuota(Request $request)
+    {
+        //CEK USER AKTIF
+        $username = $request->cookie('username');
+        if($username==""){ //SURUH LOGIN JIKA TDK ADA USER AKTIF
+            return redirect()->route('admin');
+        };
+        // $a=Transaksi::where('kode', "SD10")->update(['status'=>"2"]);
+        // return $a;
+
+        //AMBIL DATA USER AKTIF
+        $user = Admin::where('username', $username)->select('name')->get();
+
+        //ambil id dan nama opeator
+        $operator = Operator::select('id', 'name')->get();
+        // return $operator;
+        //pass data user, operator
+        return view('insertKuota', ['idOperator'=>1,'deskripsi'=>"", 'name'=>"",'is24jam'=>"",'isPromo'=>"",'isAvailable'=>"",'days'=>"", 'user'=>$user[0]['name'], 'operator'=>$operator]);
+    }
+
+    public function insertKuota(Request $request)
+    {
+        //CEK USER AKTIF
+        $username = $request->cookie('username');
+        if($username==""){ //SURUH LOGIN JIKA TDK ADA USER AKTIF
+            return redirect()->route('admin');
+        };
+        //simpan ke db
+        $input = $request->all();
+        // return $input;
+        $b = Kuota::Create($input);
+
+        //AMBIL DATA USER AKTIF
+        $user = Admin::where('username', $username)->select('name')->get();
+        //ambil semua data operator
+        $operator = Operator::select('id', 'name')->get();        
+        //pass data user, operator
+        return view('insertKuota', ['idOperator'=>$request->operator, 'name'=>$request->name,'deskripsi'=>$request->deskripsi,'is24jam'=>$request->is24jam,'isPromo'=>$request->isPromo,'isAvailable'=>$request->isAvailable,'days'=>$request->days, 'user'=>$user[0]['name'], 'operator'=>$operator]);
+    }
+
+    public function editKuota(Request $request)
+    {
+        $inputs = $request->all();
+
+        $a = Kuota::where('kode', $inputs['kode'])->update([$inputs['kolom']=>$inputs['nilai']]);
+    }
+
+    public function isAvailable(Request $request)
+    {
+        $inputs = $request->all();
+
+        $a = Kuota::where('kode', $inputs['kode'])->update(['isAvailable'=>$inputs['nilai']]);
+    }
+
+    public function editKuotaGet(Request $request)
+    {
+        //CEK USER AKTIF
+        $username = $request->cookie('username');
+        if($username==""){ //SURUH LOGIN JIKA TDK ADA USER AKTIF
+            return redirect()->route('admin');
+        };
+
+        //AMBIL DATA USER AKTIF
+        $user = Admin::where('username', $username)->select('name')->get();
+
+        //ambil id dan nama opeator
+        $operator = Operator::select('id', 'name')->get();
+        $allKuota = Kuota::all();
+        // return $allKuota;
+        //pass data user, operator
+        return view('editKuota',['allKuota'=>$allKuota,'user'=>$user[0]['name'], 'operator'=>$operator]);
     }
 
     public function pesan(Request $request){

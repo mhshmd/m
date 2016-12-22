@@ -1,0 +1,12 @@
+table.tablesorter .header {
+	background-image: url(bg.gif);
+	background-repeat: no-repeat;
+}
+table.tablesorter .headerSortUp {
+	background-image: url(asc.gif);
+	background-repeat: no-repeat;
+}
+table.tablesorter .headerSortDown {
+	background-image: url(desc.gif);
+	background-repeat: no-repeat;
+}

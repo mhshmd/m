@@ -119,7 +119,7 @@
                             </strong>
                         </li> 
                          <li>
-                            Lembar jawaan tidak boleh kotor atau terlipat
+                            Lembar jawaban tidak boleh kotor atau terlipat
                         </li> 
                          <li>
                             Hanya lembar jawaban yang dikumpulkan, sedangkan soal bisa dibawa pulang
