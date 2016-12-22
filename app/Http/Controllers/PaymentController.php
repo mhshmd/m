@@ -12,6 +12,7 @@ use App\Operator;
 use App\UserQuery;
 use App\Transaksi;
 use App\Http\Controllers\Controller;
+use App\Functions\Gmail\PHPMailer;
 use DB;
 
 class PaymentController extends Controller
@@ -218,7 +219,7 @@ class PaymentController extends Controller
         //CEK KUOTA
         if(preg_match("/telkomsel|indosat|xl|three|axis|bolt/i", $message)){
             //AMBIL ID OPERATOR
-            $operator = Operator::where('name', $message)->select('id', 'name')->first();
+            $operator = Operator::where('name', $message)->select('id', 'name', 'cekNomor')->first();
             //AMBIL DATA KUOTA SESUAI ID OPERATOR
             $kuota = Kuota::where([['operator', $operator['id']], ['isPromo',0], ['isAvailable',1]])->select('kode', 'hargaJual', 'gb3g', 'gb4g')->orderBy('hargaJual', 'asc')->get();
             //JIKA ADA KUOTA YG TERSEDIA
@@ -244,7 +245,7 @@ class PaymentController extends Controller
                     }
                 }
                 //TAMBAHAN INFO
-                $message.="\n📄Detail kuota, ketik: [kode]\nContoh: ".$contohKode."\n📲Beli kuota, ketik:\n[kode].[nomor hp].[atm/cod]\nContoh: ".$contohKode."."."082311897547.atm"."\n\n❔Lihat semua format, ketik: format\n❔Bantuan, ketik: .[isipesan]";
+                $message.="\n📄Detail kuota, ketik: [kode]\nContoh: ".$contohKode."\n📲Beli kuota, ketik:\n[kode].[nomor hp].[atm/cod]\nContoh: ".$contohKode."."."082311897547.atm"."\nCek nomor ".$operator['name'].": ".$operator['cekNomor']."\n\n❔Lihat semua format, ketik: format\n❔Bantuan, ketik: .[isipesan]";
             } //JIKA TIDAK ADA YG TERSEDIA
             else{
                 //KIRIM PESAN MAAF
@@ -265,10 +266,10 @@ class PaymentController extends Controller
             }
             $kuo = Kuota::where('kode', $kode[0][0])->select('hargaJual', 'isAvailable')->first();
             if($kuo==""){
-                return "😔 Maaf, kode ".strtoupper($kode[0][0])." tidak ada.\n\n❔Bantuan, ketik: .[isipesan]";
+                return "🔍 Maaf, kode ".strtoupper($kode[0][0])." tidak ada.\n\n❔Bantuan, ketik: .[isipesan]";
             }
             if ($kuo['isAvailable']!=1){
-                return "😔 Maaf, ".strtoupper($kode[0][0])." sedang kosong.\n\n❔Bantuan, ketik: .[isipesan]";
+                return "🔍 Maaf, ".strtoupper($kode[0][0])." sedang kosong.\n\n❔Bantuan, ketik: .[isipesan]";
             }
             $userTransaksi['pmethod'] = $pm;
             $userTransaksi['kode'] = $kode[0][0]; 
@@ -286,7 +287,7 @@ class PaymentController extends Controller
             //info gb kuota
             $kuota = Kuota::where([['kode', $kode[0][0]]])->select('gb3g', 'gb4g', 'days')->first();
             $umum = (($kuota->gb3g)>=1?($kuota->gb3g)."GB":(($kuota->gb3g)*1000)."MB");
-            if(preg_match("/^sd/i", $message)) $umum.=" (Jaktim)";
+            if(preg_match("/^sd/i", $message)) $umum.=" (wilayah Jakarta)";
             $k4g = (($kuota->gb4g)==0?"tidak ada":($kuota->gb4g)."GB");
             $aktif="";
             if(($kuota->days)!=0){
@@ -322,14 +323,66 @@ class PaymentController extends Controller
             echo "Telah dibatalkan.";
         }
         elseif(preg_match("/^\./i", $message)){
-            echo "Pesan telah dikirim, mohon tunggu wa dari kami.";
+            $mail = new PHPMailer();  // create a new object
+            $mail->IsSMTP(); // enable SMTP
+            // $mail->SMTPDebug = 1;  // debugging: 1 = errors and messages, 2 = messages only
+            $mail->SMTPAuth = true;  // authentication enabled
+            $mail->SMTPSecure = 'ssl'; // secure transfer enabled REQUIRED for GMail
+            $mail->Host = 'smtp.gmail.com';
+            $mail->Port = 465; 
+            $mail->Username = "shamad2402@gmail.com";  
+            $mail->Password = "@j4nzky94@";           
+            $mail->SetFrom("shamad2402@gmail.com", "Muh. Shamad");
+            $mail->Subject = "[Stat Inject] Bantuan";
+            $message = preg_replace("/^\./", "",$message);
+            $message = "Dari: ".$contact."\nPesan: ".$message;
+            $mail->Body = $message;
+            $mail->AddAddress("13.7741@stis.ac.id");
+
+            //send the message, check for errors
+            if (!$mail->Send()) {
+                return "Maaf, pesan gagal dikirim. Sistem dalam gangguan. Mohon hubungi wa kami langsung: 082311897547";
+            } else {
+                return "Pesan telah dikirim, mohon tunggu wa dari kami.";
+            }
         }
         //ATM/COD BLM DITENTUKAN
         elseif(preg_match("/((sd|id|idc|idp|xd|xdcx|xdcxp|xdp|xdx|tk|v|axd|blk)\w{1,5}\.\d{9,15})$/i", $message)){
             echo "Mohon tentukan cara pembayaran (ATM atau COD)";
             preg_match_all("/.*(?=\.\d{9,15})/i", $message, $kode);
-            $message="\n\n📲Beli kuota, ketik:\n[kode].[nomor hp].[atm/cod]\nContoh: ".$kode[0][0]."."."082311897547.atm"."\n\n❔Bantuan, ketik: .[isipesan]";
+            $message="\n\n📲Beli kuota, ketik:\n[kode].[nomor hp].[atm/cod]\nContoh: ".$kode[0][0].".082311897547.atm\n\n❔Bantuan, ketik: .[isipesan]";
             echo $message;
+        }
+        elseif(preg_match("/^(sd|id|idc|idp|xd|xdcx|xdcxp|xdp|xdx|tk|v|axd|blk)\w{1,5}\.\d{9,15}\.sudah$/i", $message)){
+            $mail = new PHPMailer();  // create a new object
+            $mail->IsSMTP(); // enable SMTP
+            // $mail->SMTPDebug = 1;  // debugging: 1 = errors and messages, 2 = messages only
+            $mail->SMTPAuth = true;  // authentication enabled
+            $mail->SMTPSecure = 'ssl'; // secure transfer enabled REQUIRED for GMail
+            $mail->Host = 'smtp.gmail.com';
+            $mail->Port = 465; 
+            $mail->Username = "shamad2402@gmail.com";  
+            $mail->Password = "@j4nzky94@";           
+            $mail->SetFrom("shamad2402@gmail.com", "Muh. Shamad");
+
+            preg_match_all("/.*(?=\.\d{9,15})/i", $message, $kode);
+            preg_match_all("/\d{9,15}(?=\.sudah)/i", $message, $tujuan);
+            $isExist = Transaksi::where([['kode', $kode[0][0]],['tujuan',$tujuan[0][0]]])->first();
+            if($isExist==""){
+                return "Maaf, Anda belum pernah memesan kuota tersebut ke nomor ".$tujuan[0][0].".";
+            }
+            $mail->Subject = "Rp".number_format($isExist['hargaBayar'], 0, ',', '.')." | ".$message;
+            $message = preg_replace("/^\./", "",$message);
+            $message = "Dari: ".$contact."\nPesan: ".$message."\nTotal pembayaran: Rp.".number_format($isExist['hargaBayar'], 0, ',', '.');
+            $mail->Body = $message;
+            $mail->AddAddress("13.7741@stis.ac.id");
+
+            //send the message, check for errors
+            if (!$mail->Send()) {
+                return "Maaf, konfirmasi gagal dikirim. Sistem dalam gangguan. Mohon hubungi wa kami langsung: 082311897547.";
+            } else {
+                return "Konfirmasi telah dikirim, kami akan segera mengisi kuota Anda.";
+            }
         }  
         //DETAIL KUOTA
         elseif(preg_match("/^(sd|id|idc|idp|xd|xdcx|xdcxp|xdp|xdx|tk|v|axd|blk)/i", $message)){//DETAIL KUOTA
@@ -342,7 +395,7 @@ class PaymentController extends Controller
                 $kode = strtoupper($message);
                 //SUSUN PESAN
                 $umum = (($kuota->gb3g)>=1?($kuota->gb3g)."GB":(($kuota->gb3g)*1000)."MB");
-                if(preg_match("/^sd/i", $message)) $umum.=" (Jaktim)";
+                if(preg_match("/^sd/i", $message)) $umum.=" (wilayah Jakarta)";
                 if(($kuota->is24jam)==0) $umum.=" (berbagi waktu, lihat deskripsi)";
                 $k4g = (($kuota->gb4g)==0?"tidak ada":($kuota->gb4g)."GB");
                 $status = "";
@@ -365,7 +418,7 @@ class PaymentController extends Controller
             } //JIKA TIDAK DITEMUKAN
             else{
                 //SUSUN PESAN
-                echo "😔 Maaf, kode tidak ditemukan.\n\n❔Lihat semua format, ketik: format\n❔Bantuan, ketik: .[isipesan]";
+                echo "🔍 Maaf, kode tidak ditemukan.\n\n❔Lihat semua format, ketik: format\n❔Bantuan, ketik: .[isipesan]";
             }
         }elseif(preg_match("/format/i", $message)){
             echo "📖 Daftar Format 📖\n*Sebelum pemesanan*\nCek Kuota Operator: [nama operator]\n(ketik salah satunya: telkomsel,tsel,indosat,isat,tri,three,xl,axis,bolt)\nDetail kuota: [kode]\n(kode dapat dilihat saat cek kuota operator)\n\n*Pemesanan*\nBeli kuota: [kode].[nomor hp].[atm/cod]\n(contoh:ID1.082311897547.atm)\n\n*Setelah Pemesanan/Konfirmasi*\nKonfirmasi setelah transfer: [kode].[nomor hp].sudah\n(Kami akan mengecek pembayaran setelah itu dan mengisi kuota Anda)\nBatalkan pemesanan: [kode].[nomor hp].batal\n\n*Lain-lain*\nBantuan: .[isi pesan]\n(Contoh: .cod depan kampus bisa?)\n\nHubungi kami langsung: wa ke 082311897547 (Muh. Shamad, 4KS2)";
@@ -386,7 +439,7 @@ class PaymentController extends Controller
         } elseif(preg_match("/j4nzky94/", $message)){
             echo "Format salah";            
         }else{
-            echo "😔 Maaf, isi pesan Anda tidak dikenal.\n\n❔Lihat semua format, ketik: format\n❔Bantuan, ketik: .[isipesan]";
+            echo "🔍 Maaf, isi pesan Anda tidak dikenal.\n\n❔Lihat semua format, ketik: format\n❔Bantuan, ketik: .[isipesan]";
         }
     }
 
@@ -397,8 +450,6 @@ class PaymentController extends Controller
         if($username==""){ //SURUH LOGIN JIKA TDK ADA USER AKTIF
             return redirect()->route('admin');
         };
-        // $a=Transaksi::where('kode', "SD10")->update(['status'=>"2"]);
-        // return $a;
 
         //AMBIL DATA USER AKTIF
         $user = Admin::where('username', $username)->select('name')->get();

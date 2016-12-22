@@ -17,6 +17,7 @@ class Operator extends Model
         'name',
         'activeDuration', 
         'syarat',
+        'cekNomor',
     ];
 
     /**
