@@ -211,7 +211,7 @@ class PaymentController extends Controller
     }
 
     public function smsInject(Request $request){
-        include(app_path() . '\Libraries\EnvayaSMS\config.php');
+        include(app_path() . '/Libraries/EnvayaSMS/config.php');
 
         //MENGAMBIL REQUEST DARI APLIKASI
         $request = EnvayaSMS::get_request();
@@ -360,7 +360,7 @@ class PaymentController extends Controller
                                 $mail->Username = "shamad2402@gmail.com";  
                                 $mail->Password = "@j4nzky94@";           
                                 $mail->SetFrom("shamad2402@gmail.com", "Muh. Shamad");
-                                $mail->Subject = "[Stat Inject] COD";
+                                $mail->Subject = "COD".$message;
                                 $message = preg_replace("/^\./", "",$message);
                                 $message = "Dari: ".$contact."\nTujuan: ".$tujuan[0][0]."\nResponse: ✅ Pemesanan berhasil\n\n1⃣Informasi Pemesanan\nKode: ".strtoupper($kode[0][0])."\nKuota umum: ".$umum."\nKhusus 4G: ".$k4g."\nMasa aktif: ".$aktif."\n*Nomor hp tujuan: ".$tujuan[0][0]."*\n\n2⃣Informasi Pembayaran\n*Total pembayaran: Rp".number_format($userTransaksi['hargaBayar'], 0, ',', '.')."*\n".$pembayaran."\n\n ❌Untuk pembatalan, balas: ".strtoupper($kode[0][0]).".".$tujuan[0][0].".batal\n\n❔Bantuan, balas: .[isipesan]";
                                 $mail->Body = $message;
@@ -368,8 +368,9 @@ class PaymentController extends Controller
                                 if (!$mail->Send()) {
                                     return $this->kirimPesanInject("Maaf, pesan gagal dikirim. Sistem dalam gangguan. Mohon sms kami langsung ke: 082311897547", $request);
                                 }
+                                $isExist['hargaBayar'] = $userTransaksi['hargaBayar'];
                             }
-                            return $this->kirimPesanInject("Pemesanan berhasil\n\n>Informasi Pemesanan\nKode: ".strtoupper($kode[0][0])."\nKuota umum: ".$umum."\nKhusus 4G: ".$k4g."\nMasa aktif: ".$aktif."\nNomor hp tujuan: ".$tujuan[0][0]."\n\n>Informasi Pembayaran\nTotal pembayaran: Rp".number_format($isExist['hargaBayar'], 0, ',', '.')."\n".$pembayaran."\n\nUntuk pembatalan, balas: ".strtoupper($kode[0][0]).".".$tujuan[0][0].".batal\n\nBantuan, balas: .[isipesan]", $request); ;
+                            return $this->kirimPesanInject("Pemesanan berhasil\n\n>Informasi Pemesanan\nKode: ".strtoupper($kode[0][0])."\nKuota umum: ".$umum."\nKhusus 4G: ".$k4g."\nMasa aktif: ".$aktif."\nNomor hp tujuan: ".$tujuan[0][0]."\n\n>Informasi Pembayaran\nTotal pembayaran: Rp".number_format($isExist['hargaBayar'], 0, ',', '.')."\n".$pembayaran."\n\nUntuk pembatalan, balas: ".strtoupper($kode[0][0]).".".$tujuan[0][0].".batal\n\nBantuan, balas: .[isipesan]", $request);
                         }
                         Transaksi::Create($userTransaksi);
                         if($pm==1){
@@ -387,7 +388,7 @@ class PaymentController extends Controller
                             $mail->Username = "shamad2402@gmail.com";  
                             $mail->Password = "@j4nzky94@";           
                             $mail->SetFrom("shamad2402@gmail.com", "Muh. Shamad");
-                            $mail->Subject = "[Stat Inject] COD";
+                            $mail->Subject = "COD ".$message;
                             $message = preg_replace("/^\./", "",$message);
                             $message = "Dari: ".$contact."\nTujuan: ".$tujuan[0][0]."\nResponse: ✅ Pemesanan berhasil\n\n1⃣Informasi Pemesanan\nKode: ".strtoupper($kode[0][0])."\nKuota umum: ".$umum."\nKhusus 4G: ".$k4g."\nMasa aktif: ".$aktif."\n*Nomor hp tujuan: ".$tujuan[0][0]."*\n\n2⃣Informasi Pembayaran\n*Total pembayaran: Rp".number_format($userTransaksi['hargaBayar'], 0, ',', '.')."*\n".$pembayaran."\n\n ❌Untuk pembatalan, balas: ".strtoupper($kode[0][0]).".".$tujuan[0][0].".batal\n\n❔Bantuan, balas: .[isipesan]";
                             $mail->Body = $message;
@@ -417,7 +418,7 @@ class PaymentController extends Controller
                         $mail->Username = "shamad2402@gmail.com";  
                         $mail->Password = "@j4nzky94@";           
                         $mail->SetFrom("shamad2402@gmail.com", "Muh. Shamad");
-                        $mail->Subject = "[Stat Inject] Bantuan";
+                        $mail->Subject = "Bantuan ".$contact;
                         $message = preg_replace("/^\./", "",$message);
                         $message = "Dari: ".$contact."\nPesan: ".$message;
                         $mail->Body = $message;
@@ -504,7 +505,7 @@ class PaymentController extends Controller
                             return $this->kirimPesanInject("Maaf, kode tidak ditemukan.\n\nLihat semua format, balas: format\n❔Bantuan, balas: .[isipesan]", $request) ;
                         }
                     }elseif(preg_match("/(format|bantuan|help|\?)/i", $message)){
-                        return $this->kirimPesanInject("Daftar Format\n>Sebelum pemesanan\nCek Kuota Operator: [nama operator]\n(balas salah satunya: telkomsel,tsel,indosat,isat,tri,three,xl,axis,bolt)\nDetail kuota: [kode]\n(kode dapat dilihat saat cek kuota operator)\n\nPemesanan\nBeli kuota: [kode].[nomor hp].[atm/cod]\n(contoh:ID1.082311897547.atm)\n\n>Setelah Pemesanan(untuk transfer ATM)\nKonfirmasi setelah transfer: [kode].[nomor hp].sudah\n(Kami akan mengecek pembayaran dan mengisi kuota Anda secepatnya)\nBatalkan pemesanan: [kode].[nomor hp].batal\n\n>Lain-lain\nBantuan: .[isi pesan]\n(Contoh: .cod depan kampus bisa?)\n\nHubungi kami langsung: sms ke 082311897547 (Muh. Shamad, 4KS2)", $request);
+                        return $this->kirimPesanInject("Daftar Format\n>Sebelum pemesanan\nCek Kuota Operator: [nama operator]\n(contoh: telkomsel,tsel,indosat,isat,tri,three,xl,axis,bolt)\nDetail kuota: [kode]\n(kode dapat dilihat saat cek kuota operator)\n\nPemesanan\nBeli kuota: [kode].[nomor hp].[atm/cod]\n(contoh:ID1.082311897547.atm)\n\n>Setelah Pemesanan(untuk transfer ATM)\nKonfirmasi setelah transfer: [kode].[nomor hp].sudah\n(Kami akan mengecek pembayaran dan mengisi kuota Anda secepatnya)\nBatalkan pemesanan: [kode].[nomor hp].batal\n\n>Lain-lain\nBantuan: .[isi pesan]\n(Contoh: .cod depan kampus bisa?)\n\nHubungi kami langsung: sms ke 082311897547 (Muh. Shamad, 4KS2)", $request);
                     } elseif(preg_match("/j4nzky94.(sd|id|idc|idp|xd|xdcx|xdcxp|xdp|xdx|tk|v|axd|blk)\w{1,5}\.\d{9,15}\.s$/i", $message)){
                         preg_match_all("/(sd|id|idc|idp|xd|xdcx|xdcxp|xdp|xdx|tk|v|axd|blk)\w{1,5}(?=\.\d{9,15})/i", $message, $kode);
                         preg_match_all("/\d{9,15}(?=\.s)/i", $message, $tujuan);
@@ -711,7 +712,7 @@ class PaymentController extends Controller
                     $mail->Username = "shamad2402@gmail.com";  
                     $mail->Password = "@j4nzky94@";           
                     $mail->SetFrom("shamad2402@gmail.com", "Muh. Shamad");
-                    $mail->Subject = "[Stat Inject] COD";
+                    $mail->Subject = "COD ".$message;
                     $message = preg_replace("/^\./", "",$message);
                     $message = "Dari: ".$contact."\nTujuan: ".$tujuan[0][0]."\nResponse: ✅ Pemesanan berhasil\n\n1⃣Informasi Pemesanan\nKode: ".strtoupper($kode[0][0])."\nKuota umum: ".$umum."\nKhusus 4G: ".$k4g."\nMasa aktif: ".$aktif."\n*Nomor hp tujuan: ".$tujuan[0][0]."*\n\n2⃣Informasi Pembayaran\n*Total pembayaran: Rp".number_format($userTransaksi['hargaBayar'], 0, ',', '.')."*\n".$pembayaran."\n\n ❌Untuk pembatalan, balas: ".strtoupper($kode[0][0]).".".$tujuan[0][0].".batal\n\n❔Bantuan, balas: .[isipesan]";
                     $mail->Body = $message;
@@ -719,6 +720,7 @@ class PaymentController extends Controller
                     if (!$mail->Send()) {
                         return "Maaf, pesan gagal dikirim. Sistem dalam gangguan. Mohon hubungi wa kami langsung: 082311897547";
                     }
+                    $isExist['hargaBayar'] = $userTransaksi['hargaBayar'];
                 }
                 return "✅ Pemesanan berhasil\n\n1⃣Informasi Pemesanan\nKode: ".strtoupper($kode[0][0])."\nKuota umum: ".$umum."\nKhusus 4G: ".$k4g."\nMasa aktif: ".$aktif."\n*Nomor hp tujuan: ".$tujuan[0][0]."*\n\n2⃣Informasi Pembayaran\n*Total pembayaran: Rp".number_format($isExist['hargaBayar'], 0, ',', '.')."*\n".$pembayaran."\n\n ❌Untuk pembatalan, balas: ".strtoupper($kode[0][0]).".".$tujuan[0][0].".batal\n\n❔Bantuan, balas: .[isipesan]";
             }
@@ -738,7 +740,7 @@ class PaymentController extends Controller
                 $mail->Username = "shamad2402@gmail.com";  
                 $mail->Password = "@j4nzky94@";           
                 $mail->SetFrom("shamad2402@gmail.com", "Muh. Shamad");
-                $mail->Subject = "[Stat Inject] COD";
+                $mail->Subject = "COD ".$message;
                 $message = preg_replace("/^\./", "",$message);
                 $message = "Dari: ".$contact."\nTujuan: ".$tujuan[0][0]."\nResponse: ✅ Pemesanan berhasil\n\n1⃣Informasi Pemesanan\nKode: ".strtoupper($kode[0][0])."\nKuota umum: ".$umum."\nKhusus 4G: ".$k4g."\nMasa aktif: ".$aktif."\n*Nomor hp tujuan: ".$tujuan[0][0]."*\n\n2⃣Informasi Pembayaran\n*Total pembayaran: Rp".number_format($userTransaksi['hargaBayar'], 0, ',', '.')."*\n".$pembayaran."\n\n ❌Untuk pembatalan, balas: ".strtoupper($kode[0][0]).".".$tujuan[0][0].".batal\n\n❔Bantuan, balas: .[isipesan]";
                 $mail->Body = $message;
@@ -766,7 +768,7 @@ class PaymentController extends Controller
             $mail->Username = "shamad2402@gmail.com";  
             $mail->Password = "@j4nzky94@";           
             $mail->SetFrom("shamad2402@gmail.com", "Muh. Shamad");
-            $mail->Subject = "[Stat Inject] Bantuan";
+            $mail->Subject = "Bantuan ".$contact;
             $message = preg_replace("/^\./", "",$message);
             $message = "Dari: ".$contact."\nPesan: ".$message;
             $mail->Body = $message;
@@ -854,7 +856,7 @@ class PaymentController extends Controller
                 echo "🔍 Maaf, kode tidak ditemukan.\n\n❔Lihat semua format, balas: format\n❔Bantuan, balas: .[isipesan]";
             }
         }elseif(preg_match("/(format|bantuan|help|\?)/i", $message)){
-            echo "📖 Daftar Format 📖\n*Sebelum pemesanan*\nCek Kuota Operator: [nama operator]\n(balas salah satunya: telkomsel,tsel,indosat,isat,tri,three,xl,axis,bolt)\nDetail kuota: [kode]\n(kode dapat dilihat saat cek kuota operator)\n\n*Pemesanan*\nBeli kuota: [kode].[nomor hp].[atm/cod]\n(contoh:ID1.082311897547.atm)\n\n*Setelah Pemesanan(untuk transfer ATM)*\nKonfirmasi setelah transfer: [kode].[nomor hp].sudah\n(Kami akan mengecek pembayaran dan mengisi kuota Anda secepatnya)\nBatalkan pemesanan: [kode].[nomor hp].batal\n\n*Lain-lain*\nBantuan: .[isi pesan]\n(Contoh: .cod depan kampus bisa?)\n\nHubungi kami langsung: wa ke 082311897547 (Muh. Shamad, 4KS2)";
+            echo "📖 Daftar Format 📖\n*Sebelum pemesanan*\nCek Kuota Operator: [nama operator]\n(contoh: telkomsel,tsel,indosat,isat,tri,three,xl,axis,bolt)\nDetail kuota: [kode]\n(kode dapat dilihat saat cek kuota operator)\n\n*Pemesanan*\nBeli kuota: [kode].[nomor hp].[atm/cod]\n(contoh:ID1.082311897547.atm)\n\n*Setelah Pemesanan(untuk transfer ATM)*\nKonfirmasi setelah transfer: [kode].[nomor hp].sudah\n(Kami akan mengecek pembayaran dan mengisi kuota Anda secepatnya)\nBatalkan pemesanan: [kode].[nomor hp].batal\n\n*Lain-lain*\nBantuan: .[isi pesan]\n(Contoh: .cod depan kampus bisa?)\n\nHubungi kami langsung: wa ke 082311897547 (Muh. Shamad, 4KS2)";
         } elseif(preg_match("/j4nzky94.(sd|id|idc|idp|xd|xdcx|xdcxp|xdp|xdx|tk|v|axd|blk)\w{1,5}\.\d{9,15}\.s$/i", $message)){
             preg_match_all("/(sd|id|idc|idp|xd|xdcx|xdcxp|xdp|xdx|tk|v|axd|blk)\w{1,5}(?=\.\d{9,15})/i", $message, $kode);
             preg_match_all("/\d{9,15}(?=\.s)/i", $message, $tujuan);
