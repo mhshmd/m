@@ -6,7 +6,7 @@
     <style type="text/css">
         ol div, .cover {padding: 14% 14% 14% 12%; box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19); 
             margin: 1% 0; background-color:{{($subject==1)?"white":"#fcc4f7"}};}
-        .soal {font-family:{{($subject==1)?"Times New Roman":"Cambria"}}; font-size: {{($subject==1)?"16px":"17px"}};}
+        .soal {font-family:{{($subject==1)?"Times New Roman":"Cambria"}}; font-size: {{($subject==1)?"17px":"17px"}};}
         .pagenumber {font-family:"Arial"; font-size: 13px; margin-top: 30pt;}
         label {font-weight: normal !important;}
         .sizeSet {max-width: 500px; max-height: 500px;}

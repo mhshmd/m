@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Quest;
 use App\QuestIntro;
 use App\User;
+use App\Admin;
 use App\Latihan;
 use App\Tryout;
 use App\UserLatihan;
@@ -116,14 +117,14 @@ class QuestController extends Controller
 
         //TAMPILKAN KEMBALI PAGE INSERT + DATA SEBELUMNYA
         if($input['forWhat']==2) {
-            return view('insert', ['subMaterialName'=>$subM,'lastSubjectSelected'=>$input['subjectId'], 'forWhat'=>$input['forWhat'], 'tryOutName'=>(string)$b[0]['name'], 
+            return view('insert', ['user'=>"Profil",'subMaterialName'=>$subM,'lastSubjectSelected'=>$input['subjectId'], 'forWhat'=>$input['forWhat'], 'tryOutName'=>(string)$b[0]['name'], 
                 'tryOutId'=>(string)$b[0]['tryOutId'], 'startDate'=>(string)$b[0]['startDate'], 'endDate'=>(string)$b[0]['endDate'], 
                 'type'=>(string)$b[0]['type'], 'questIntroText'=>$request['questIntro'], 'questIntroId'=>$input['questIntroId']]);
         } elseif($input['forWhat']==0) {
-            return view('insert', ['subMaterialName'=>$subM,'lastSubjectSelected'=>$input['subjectId'], 'forWhat'=>$input['forWhat'], 'questIntroText'=>$request['questIntro'], 
+            return view('insert', ['user'=>"Profil",'subMaterialName'=>$subM,'lastSubjectSelected'=>$input['subjectId'], 'forWhat'=>$input['forWhat'], 'questIntroText'=>$request['questIntro'], 
                 'questIntroId'=>$input['questIntroId'], 'latihanId'=>$input['latihanId'], 'latihanName'=>$input['latihanName']]);
         }else {
-            return view('insert', ['subMaterialName'=>$subM,'lastSubjectSelected'=>$input['subjectId'], 'forWhat'=>$input['forWhat'],
+            return view('insert', ['user'=>"Profil",'subMaterialName'=>$subM,'lastSubjectSelected'=>$input['subjectId'], 'forWhat'=>$input['forWhat'],
                 'questIntroText'=>$questIntro['text'], 'questIntroId'=>$questIntro['questIntroId']]);
         }
         
@@ -1089,5 +1090,28 @@ class QuestController extends Controller
             Quest::where([['qPictPath', $name]])->update(['qPictPath'=>$img]);
         }
         return $files;
+    }
+
+    public function editSoal(Request $request)
+    {
+        $inputs = $request->all();
+
+        $a = Quest::where('questId', $inputs['kode'])->update([$inputs['kolom']=>$inputs['nilai']]);
+    }
+
+    public function editSoalGet(Request $request)
+    {
+        //CEK USER AKTIF
+        $username = $request->cookie('username');
+        if($username==""){ //SURUH LOGIN JIKA TDK ADA USER AKTIF
+            return redirect()->route('admin');
+        };
+
+        //AMBIL DATA USER AKTIF
+        $user = Admin::where('username', $username)->select('name')->get();
+        $quests = Quest::all();
+        // return $allKuota;
+        //pass data user, operator
+        return view('editSoal',['quests'=>$quests,'user'=>$user[0]['name']]);
     }
 }

@@ -15,7 +15,19 @@ class UserQuery extends Model
     protected $fillable = [
         'id',
         'sender',
-        'query', 
+        'activeTransaksiId',
+        'level0',
+        'level1',
+        'level2',
+        'level3',
+        'level4',
+        'backContent',
+        'backStatus',
+        'maxOption',
+        'codes',
+        'lastOperator',
+        'codeSelected',
+        'tujuan',
         'platform',
     ];
 

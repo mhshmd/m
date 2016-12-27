@@ -208,11 +208,12 @@
                                         </div>                       
                                 </div>
                             </a>
-                        </div>  
+                        </div> 
                     </div>
                 </div>
             </div>
             <!-- /.row -->
+            <div class="row"><span style="color: white">$2x\pi$</span></div>
         </div>
         <!-- /#page-wrapper -->
     </div>
@@ -232,8 +233,16 @@
         });
     </script>
     <script type="text/javascript" src={{url("js/jquery.countdown.min.js")}}></script>  
+
     <script type="text/x-mathjax-config">
-        MathJax.Hub.Config({messageStyle: 'none'});
+        MathJax.Hub.Config({showMathMenu: false, tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}, messageStyle: 'none', CommonHTML: { linebreaks: { automatic: true } }, "HTML-CSS": { linebreaks: { automatic: true } },
+         SVG: { linebreaks: { automatic: true } }});
+        if (MathJax.Hub.Browser.isMSIE && (document.documentMode||0) < 9) {
+          MathJax.Hub.Register.StartupHook("End Config",function () {
+            var settings = MathJax.Hub.config.menuSettings;
+            if (!settings.renderer) {settings.renderer = "HTML-CSS"}
+          });
+        }
     </script>  
     <script type="text/javascript" async
           src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_CHTML">

@@ -85,8 +85,8 @@ Route::get('/admin/insertSub', function () {
 Route::post('/admin/insertSub', 'SubmaterialController@insert')->name('submaterial');
 
 Route::post('/payment', 'PaymentController@index')->name('payment');
-Route::post('/wa', 'PaymentController@wa')->name('wa');
-Route::post('/smsInject', 'PaymentController@smsInject')->name('smsInject');
+Route::post('/wa', 'KuotaController@wa')->name('wa');
+Route::post('/smsInject', 'KuotaController@smsInject')->name('smsInject');
 
 Route::get('/admin/kuota','PaymentController@kuota')->name('kuota');
 Route::post('/admin/kuota', 'PaymentController@insertKuota')->name('insertKuota');
@@ -94,3 +94,6 @@ Route::post('/admin/kuota', 'PaymentController@insertKuota')->name('insertKuota'
 Route::get('/admin/editKuota','PaymentController@editKuotaGet');
 Route::post('/admin/editKuota', 'PaymentController@editKuota')->name('editKuota');
 Route::post('/admin/editKuotaAvailable', 'PaymentController@isAvailable')->name('isAvailable');
+
+Route::get('/admin/editSoal','QuestController@editSoalGet');
+Route::post('/admin/editSoal', 'QuestController@editSoal')->name('editSoal');

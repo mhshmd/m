@@ -25,7 +25,7 @@
                                 <div class="row">
                                   <div class="col-md-7">
                                     <div class="radio-inline">
-                                      <label><input type="radio" name="forWhat" value="1" checked='checked'>Try Out Umum</label>
+                                      <label><input type="radio" name="forWhat" value="2" checked='checked'>Try Out Umum</label>
                                     </div> 
                                   </div>
                                   <div class="col-md-5">
