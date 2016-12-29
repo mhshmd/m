@@ -47,9 +47,9 @@
                                 <div class="form-group">
                                   <label class="control-label">Quest Intro (optional)</label>
                                     <div class="form-group">
-                                          <input style="display: none;" type="text" style="width:150px" class="form-control" placeholder="Quest Intro ID" name="questIntroId" value="{{$questIntroId or ""}}">
+                                          <input type="text" style="width:150px" class="form-control" placeholder="Quest Intro ID" name="questIntroId" value="{{$questIntroId or ""}}">
                                     </div>
-                                    <textarea style="display: none;" class="form-control" id="questIntro" name='questIntro' rows="3" placeholder="Text">{{$questIntroText or ""}}</textarea>
+                                    <textarea class="form-control" id="questIntro" name='questIntro' rows="3" placeholder="Text">{{$questIntroText or ""}}</textarea>
                                 </div>                               
                                 <div>
                                     <div class="form-group col-md-12" style="padding:0">

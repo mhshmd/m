@@ -87,6 +87,7 @@ Route::post('/admin/insertSub', 'SubmaterialController@insert')->name('submateri
 Route::post('/payment', 'PaymentController@index')->name('payment');
 Route::post('/wa', 'KuotaController@wa')->name('wa');
 Route::post('/smsInject', 'KuotaController@smsInject')->name('smsInject');
+Route::get('/xmpp','KuotaController@xmpp');
 
 Route::get('/admin/kuota','PaymentController@kuota')->name('kuota');
 Route::post('/admin/kuota', 'PaymentController@insertKuota')->name('insertKuota');

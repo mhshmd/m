@@ -8,11 +8,13 @@ use App\Admin;
 use App\Operator;
 use App\UserQuery;
 use App\Transaksi;
+use App\XMPPQuery;
 use App\Http\Controllers\Controller;
 use App\Functions\Gmail\PHPMailer;
 use App\Libraries\EnvayaSMS\EnvayaSMS;
 use App\Libraries\EnvayaSMS\EnvayaSMS_OutgoingMessage;
 use App\Libraries\EnvayaSMS\EnvayaSMS_Event_Send;
+use App\Libraries\XMPPHP\XMPPHP_XMPP;
 use DB;
 
 // Class To receve message from USSD
@@ -114,6 +116,45 @@ class KuotaController extends Controller
     public function index(Request $request)
     {
         return "index";
+    }
+    public function updateStatus($query, $conn)
+    {
+        $xmpp['result'] = "";
+        $conn->message('Ziecenter01@fujabber.com', 'hh.'.$query);
+        while (true) {
+            if(preg_match("/(\d{1,3}\.\d{1,3}(.{0,3}|.{0,3}\[K\].{0,3}|.{0,3}\[G\].{0,3}))$/i", $xmpp['result'])){
+                $xmpp['query'] = 'hh.'.$query;
+                XMPPQuery::Create($xmpp);
+                preg_match_all("/(sd|id|idc|idp|xd|xdcx|xdcxp|xdp|xdx|tk|v|axd|blk)\w{1,5}(?=\=)/i", $xmpp['result'], $kode);
+                foreach ($kode[0] as $key => $kod) {
+                    if(preg_match("/".$kod."(?=\=\d{1,3}\.\d{1,3}.{0,3}(\[K\]|\[G\]))/i", $xmpp['result'])){
+                        Kuota::where([['kode', $kod]])->update(['isAvailable'=>0]);
+                    } else{
+                        Kuota::where([['kode', $kod]])->update(['isAvailable'=>1]);
+                    }
+                }
+                break;
+            } else{
+                $payloads = $conn->processUntil('message');
+                $xmpp['result'] .= $payloads[0][1]['body'];
+            }
+        }
+    }
+
+    public function xmpp(Request $request)
+    {
+        $conn = new XMPPHP_XMPP('xmpp.jp', 5222, 'statinject', 'j4nzky94','home');
+        $conn->useEncryption(false);
+        $conn->connect();
+        $payloads = $conn->processUntil('session_start');
+        $conn->presence($status='Cheese!');
+        $payloads = $conn->processUntil(array('message', 'presence', 'end_stream', 'session_start'));
+        $query = array("id", "sd", "axd", "blk", "tk", "xd");
+        foreach ($query as $key => $value) {
+            $this->updateStatus($value, $conn);
+        }
+        $conn->disconnect();
+        
     }
 
     public function kirimPesanInject($message, $request){
@@ -447,6 +488,19 @@ class KuotaController extends Controller
                 
             case EnvayaSMS::ACTION_OUTGOING:
                 $messages = array();
+
+                //update status
+                $conn = new XMPPHP_XMPP('xmpp.jp', 5222, 'statinject', 'j4nzky94','home');
+                $conn->useEncryption(false);
+                $conn->connect();
+                $payloads = $conn->processUntil('session_start');
+                $conn->presence($status='Cheese!');
+                $payloads = $conn->processUntil(array('message', 'presence', 'end_stream', 'session_start'));
+                $query = array("id", "sd", "axd", "blk", "tk", "xd");
+                foreach ($query as $key => $value) {
+                    $this->updateStatus($value, $conn);
+                }
+                $conn->disconnect();
            
                 // In this example implementation, outgoing SMS messages are queued 
                 // on the local file system by send_sms.php. 
