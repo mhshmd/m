@@ -22,7 +22,9 @@ class Transaksi extends Model
         'platform',
         'pmethod',
         'status',
+        'confirmed',
         'batasPembayaran',
+        'showMe',
     ];
 
     /**

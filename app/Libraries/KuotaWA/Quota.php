@@ -1,0 +1,415 @@
+<?php
+
+namespace App\Libraries\KuotaWA;
+
+#DB
+use App\Kuota;
+use App\UserQuery;
+use App\Transaksi;
+
+#Library
+use App\Libraries\KuotaWA\Email;
+
+class Quota extends MenuAbstract{
+	public $isPromo, $kode, $operatorName, $hargaJual, $gb3g, $gb4g, $days, $cekNomor, $paketName, $umum, $k4g;
+
+	public function __construct($position, $operatorName, $kode, $paketName, $isPromo, $hargaJual, $gb3g, $gb4g, $days, $cekNomor){
+
+		$this->position = $position;
+		$this->operatorName = $operatorName;
+		$this->kode = $kode;
+		$this->paketName = $paketName;
+		$this->isPromo = $isPromo;
+		$this->hargaJual = $hargaJual;
+		$this->gb3g = $gb3g;
+		$this->gb4g = $gb4g;
+		$this->days = $days;
+		$this->cekNomor = $cekNomor;
+
+        $this->umum = (($this->gb3g)>=1?($this->gb3g)."GB":(($this->gb3g)*1000)."MB");
+
+        if(preg_match("/^SD/", $kode)) $this->umum.=" (wilayah Jakarta)";
+
+        $this->k4g = (($this->gb4g)==0?"tidak ada":($this->gb4g)."GB");
+
+        if(($days)!=0){
+
+            $this->aktif = ($days)." hari";
+
+        } else{
+
+            $this->aktif = "Mengikuti kartu";
+
+        }
+
+		$totalKuota = (($gb3g<1&&$gb4g==0)?(($gb3g)*1000)."MB":(($gb3g+$gb4g)."GB"));
+		$this->name = "Rp".number_format($hargaJual, 0, ',', '.')." (".$totalKuota.")";
+
+	}
+
+	public function addSubMenu($subMenu){
+
+		$this->subMenu[$subMenu->getPosition()] = $subMenu;
+
+	}
+
+	public function select($select, $wa){
+
+		$optionAvailable = array(1=>"1");
+
+		if(!isset($optionAvailable[$select[4]])){
+
+			return $this->wrongCommand($select, $wa);
+
+		} elseif (count($select)==5) {
+
+			return $this->beli();
+
+		} elseif (count($select)==6) {
+
+			if(!$this->numberValidation($this->operatorName,$select[5])){
+
+				array_pop($select);
+
+		    	UserQuery::where([['sender', $wa->getFrom()],['saved',0]])->update(['commandArray'=>serialize($select)]);
+
+				return "Nomor yang Anda masukkan bukan nomor ".$this->operatorName."\n\n*Mohon masukkan nomor Anda lagi:*\n".$this->kembali.$this->awal;
+
+			} elseif(strlen($select[5])<10){
+
+				array_pop($select);
+
+		    	UserQuery::where([['sender', $wa->getFrom()],['saved',0]])->update(['commandArray'=>serialize($select)]);
+
+				return "Mohon masukkan 10 - 12 digit.\n\n*Mohon masukkan nomor Anda lagi:*\n".$this->kembali.$this->awal;
+
+			}
+
+			return "*Pilih cara pembayaran:*\n1. Transfer ATM/Bank\n2. COD (bayar langsung)\n\n99. Ubah nomor hp tujuan".$this->awal;
+
+		} elseif(count($select)==7 && preg_match("/[12]/", $select[6])){
+
+			$sand = 0;
+
+	        if($select[6]==1){
+
+	            $sand = rand(1,99);
+
+	        }
+
+			$batasPembayaran = date("H:i", strtotime('+5 hours'))." WIB, tanggal ".date("d-m-Y", strtotime('+5 hours'));
+
+	        $activeTransaksiId = UserQuery::where([['sender', $wa->getFrom()],['saved',0]])->select('activeTransaksiId')->value('activeTransaksiId');
+
+	        $transaksi = "";
+
+			$confirm = "Konfirmasi";
+
+	        if($activeTransaksiId != ""){
+
+	        	$transaksi = Transaksi::where([['id', $activeTransaksiId]])->first();
+
+                if($transaksi['confirmed']==1) $confirm = "Konfirmasi ulang";
+
+	        } 
+
+			if($select[6]==1){
+
+	            $pembayaran="Mohon transfer sesuai total yang tertera (termasuk tiga angka terakhir) ke rekening berikut:\n💳 *Norek: 1257-01-004085-50-9*\n*a.n.: MUH. SHAMAD*\n⏱ *Batas transfer: ".$batasPembayaran."*\nSetelah transfer, mohon pilih 1 untuk konfirmasi.\n\n1. ".$confirm."\n2. Batal";
+	        } else{
+
+	        	$pembayaran="Mohon tunggu wa dari kami (Muh. Shamad, 4KS2) untuk COD. Terima kasih.\n\n1. Batal";
+
+	        }
+
+	        //persiapan transaksi baru
+	        $userTransaksi['hargaBayar'] = $this->hargaJual-$sand;
+	        $userTransaksi['harga'] = $this->hargaJual;
+	        $userTransaksi['batasPembayaran'] = $batasPembayaran;
+	        $userTransaksi['pmethod'] = $select[6];
+	        $userTransaksi['kode'] = $this->kode; 
+	        $userTransaksi['tujuan'] = $select[5];
+	        $userTransaksi['sender'] = $wa->getFrom();
+	        $userTransaksi['platform'] = $wa->getPlatform();
+
+	        if($activeTransaksiId == ""){
+
+	        	$transaksi = Transaksi::Create($userTransaksi);
+
+				UserQuery::where([['sender', $wa->getFrom()],['saved',0]])->update(['activeTransaksiId'=>$transaksi['id']]);
+
+	        } else {
+
+	        	if($transaksi['pmethod']!=$select[6]){
+
+	        		if($select[6]==2){
+
+	        			Transaksi::where([['id', $activeTransaksiId]])->update(['pmethod'=>$select[6]]);
+
+	        			$transaksi['hargaBayar'] = $this->hargaJual;
+
+	        		} else {
+
+	        			$hargaActiveTransaksi = Transaksi::where([['id', $activeTransaksiId]])->value('hargaBayar');
+
+	        			Transaksi::where([['id', $activeTransaksiId]])->update(['pmethod'=>$select[6]]);
+
+	        			$transaksi['hargaBayar'] = $hargaActiveTransaksi;
+
+	        		}
+
+	        	}
+
+	        }
+
+	        if($select[6]==2){
+
+	        	$mail = new Email("COD ".$wa->getFrom(),"ID Pesanan : ".$transaksi['id']."Kode : ".$this->kode."\nNama paket : ".$this->paketName."\nKuota umum: ".$this->umum."\nKhusus 4G: ".$this->k4g."\nMasa aktif: ".$this->aktif."\nNomor tujuan : ".$select[5]."\nHarga bayar : ".number_format(($this->hargaJual), 0, ',', '.'));
+
+                if (!$mail->send()) {
+
+                    return "Pesan COD ke Muh. Shamad gagal, sistem dalam gangguan. Mohon hubungi kami via wa/sms : 082311897547. Terima kasih.\n\n99. Ubah cara pembayaran".$this->awal;
+
+                }
+
+	        }
+
+			return "✅ Pemesanan berhasil\n\n1⃣Informasi Pemesanan\nID pesanan: ".$transaksi['id']."\nNama paket: ".$this->paketName."\nKuota umum: ".$this->umum."\nKhusus 4G: ".$this->k4g."\nMasa aktif: ".$this->aktif."\n*Nomor hp tujuan: ".$userTransaksi['tujuan']."*\n\n2⃣Informasi Pembayaran\n*Total pembayaran: Rp".number_format($transaksi['hargaBayar'], 0, ',', '.')."*\n".$pembayaran."\n\n99. Ubah cara pembayaran".$this->awal;
+
+		} elseif(count($select)==8 && preg_match("/[123]/", $select[7])){
+
+			if($select[6]==2){ //COD
+
+				if(preg_match("/[1]/", $select[7])){
+
+					if($select[7]==1){
+
+						$mail = new Email("COD ".$wa->getFrom(),"Batal gan...\n\nKode : ".$this->kode."\nNama paket : ".$this->paketName."\nKuota umum: ".$this->umum."\nKhusus 4G: ".$this->k4g."\nMasa aktif: ".$this->aktif."\nNomor tujuan : ".$select[5]);
+
+		                $mail->send();
+
+						$activeTransaksiId = UserQuery::where([['sender', $wa->getFrom()],['saved',0]])->select('activeTransaksiId')->value('activeTransaksiId');
+
+						Transaksi::where([['id', $activeTransaksiId]])->update(['status'=>2]);
+
+						array_splice($select, 4);
+
+						UserQuery::where([['sender', $wa->getFrom()],['saved',0]])->update(['commandArray'=>serialize($select), 'activeTransaksiId'=>NULL]);
+
+						return "Pesanan telah dibatalkan.\n"."\n99. Menu kuota ".$this->operatorName.$this->awal;
+
+					} //else {
+
+						// return "*Ubah:*\n1. Kuota\n2. Nomor hp tujuan\n3. Cara pembayaran\n".$this->kembali.$this->awal;
+
+					//}
+
+				} else {
+
+					$this->wrongCommand($select, $wa);
+
+				}
+
+			} else{ //Transfer
+
+				if(preg_match("/[12]/", $select[7])){
+
+					if($select[7]==1){
+
+						$activeTransaksiId = UserQuery::where([['sender', $wa->getFrom()],['saved',0]])->select('activeTransaksiId')->value('activeTransaksiId');
+
+						$hargaBayar = Transaksi::where([['id', $activeTransaksiId]])->select('hargaBayar')->value('hargaBayar');
+
+						$mail = new Email("Konfirmasi ".$wa->getFrom(),"Harga bayar : ".number_format($hargaBayar, 0, ',', '.')."\nID Pesanan : ".$activeTransaksiId."\nKode : ".$this->kode."\nNama paket : ".$this->paketName."\nKuota umum: ".$this->umum."\nKhusus 4G: ".$this->k4g."\nMasa aktif: ".$this->aktif."\nNomor tujuan : ".$select[5]);
+
+		                if(!$mail->send()){
+
+		                	return "Konfirmasi gagal dikirim, sistem dalam gangguan. Mohon hubungi kami via wa/sms : 082311897547. Terima kasih.";
+
+		                }
+
+		                $activeTransaksiId = UserQuery::where([['sender', $wa->getFrom()],['saved',0]])->select('activeTransaksiId')->value('activeTransaksiId');
+
+						Transaksi::where([['id', $activeTransaksiId]])->update(['confirmed'=>1]);
+
+						return "Konfirmasi berhasil dikirim. Kami akan mengecek pembayaran Anda secepatnya. Mohon tunggu maksimal 1 x 24 jam. Terima kasih.\n".$this->kembali.$this->awal;
+
+					} //elseif($select[7]==2){
+
+						// return "You Edit the transaction";
+
+					// } 
+					else{
+
+						$activeTransaksiId = UserQuery::where([['sender', $wa->getFrom()],['saved',0]])->select('activeTransaksiId')->value('activeTransaksiId');
+
+						Transaksi::where([['id', $activeTransaksiId]])->update(['status'=>2]);
+
+						array_splice($select, 4);
+
+						UserQuery::where([['sender', $wa->getFrom()],['saved',0]])->update(['commandArray'=>serialize($select), 'activeTransaksiId'=>NULL]);
+
+						return "Pesanan telah dibatalkan.\n"."\n99. Menu kuota ".$this->operatorName.$this->awal;
+
+					}
+
+				} else {
+
+					$this->wrongCommand($select, $wa);
+
+				}
+
+			}
+
+		} else{
+
+			return $this->wrongCommand($select, $wa);
+
+		}
+		
+	}
+
+	public function beli(){
+
+		return "*Masukkan nomor hp tujuan:*\n(contoh: 082311897547)\n\n(cek nomor ".$this->operatorName.": ".$this->cekNomor.")\n".$this->kembali.$this->awal;
+		
+	}
+
+	public function numberValidation($operator, $number) {
+
+		if(preg_match("/telkomsel|tsel/i", $operator)) {
+
+			if(preg_match("/^(0811|0812|0813|0821|0822|0823|0852|0853|0851)/i", $number)){
+
+				return true;
+
+			}
+
+		} elseif(preg_match("/indosat|isat/i", $operator)) {
+
+			if(preg_match("/^(0856|0857|0814|0815|0816|0855|0858)/i", $number)){
+
+				return true;
+
+			}
+
+		} elseif(preg_match("/xl/i", $operator)) {
+
+			if(preg_match("/^(0817|0818|0819|0859|0877|0878)/i", $number)){
+
+				return true;
+
+			}
+
+		} elseif(preg_match("/tri|three/i", $operator)) {
+
+			if(preg_match("/^(0895|0896|0897|0898|0899)/i", $number)){
+
+				return true;
+
+			}
+
+		} elseif(preg_match("/axis/i", $operator)) {
+
+			if(preg_match("/^(0831|0832|0838)/i", $number)){
+
+				return true;
+
+			}
+
+		} elseif(preg_match("/bolt/i", $operator)) {
+
+			if(preg_match("/^(0998|0999)/i", $number)){
+
+				return true;
+
+			}
+
+		} 
+
+		return false;
+
+	} //sumber : http://www.kios-pulsa.com/article/daftar-prefix-nomor-operator-seluler-indonesia/
+
+	public function showMenu(){
+
+		$kuota = Kuota::where([['kode', $this->kode]])->select('name', 'operator', 'isAvailable', 'isPromo', 'deskripsi', 'days', 'is24jam')->first();
+
+        if(($kuota->is24jam)==0) $this->umum.=" (berbagi waktu, lihat deskripsi)";
+
+        $status = "";
+
+        if($kuota->isAvailable==1){
+
+            $status = "Tersedia";
+
+        }elseif($kuota->isAvailable==0){
+
+            $status = "Kosong";
+
+        } else{
+
+            $status = "Gangguan";
+
+        }
+
+        return "📋 ".$kuota->name."\n*Kuota*\nUmum: ".$this->umum."\nKhusus 4G: ".$this->k4g."\n\n*Harga*\nRp".number_format($this->hargaJual, 0, ',', '.')."\n\n*Info tambahan*\nStatus: ".$status."\nOperator: ".$this->operatorName."\nMasa aktif: ".$this->aktif."\nDeskripsi:\n".$kuota->deskripsi."\n\n1. Beli\n".$this->kembali.$this->awal;
+
+	}
+
+	public function showInKeranjang($transaksiId){
+
+        $transaksi = Transaksi::where([['id', $transaksiId]])->first();
+
+        $pembayaran = "";
+
+		if($transaksi['pmethod']==1){
+
+			$menu = "";
+
+			if($transaksi['status'] == 1) {
+
+				// $menu = "\n\n1. Beli lagi";
+
+			} elseif ($transaksi['status'] == 2) {
+
+	        	// $menu = "\n\n1. Ulangi pembelian";
+
+			}  elseif ($transaksi['confirmed']==0) {
+
+	        	$menu = "\nSetelah transfer, mohon pilih 1 untuk konfirmasi.\n\n1. Konfirmasi\n2. Batal";
+
+			} else {
+
+				$menu = "\nSetelah transfer, mohon pilih 1 untuk konfirmasi.\n\n1. Konfirmasi ulang\n2. Batal";
+
+			}
+
+            $pembayaran="Mohon transfer sesuai total yang tertera (termasuk tiga angka terakhir) ke rekening berikut:\n💳 *Norek: 1257-01-004085-50-9*\n*a.n.: MUH. SHAMAD*\n⏱ *Batas transfer: ".$transaksi['batasPembayaran']."*".$menu;
+        } else{
+
+			$menu = "";
+
+			if($transaksi['status'] == 0) {
+
+				$menu = "Mohon tunggu wa dari kami (Muh. Shamad, 4KS2) untuk COD. Terima kasih.\n\n1. Batal";
+
+			} elseif ($transaksi['status'] == 1) {
+
+	        	// $menu = "\n1. Beli lagi";
+
+			} else {
+
+				// $menu = "\n1. Ulangi pembelian";
+
+			}
+
+        	$pembayaran.=$menu;
+
+        }
+
+		return "1⃣ Informasi Pemesanan\nID pesanan: ".$transaksiId."\nNama paket: ".$this->paketName."\nKuota umum: ".$this->umum."\nKhusus 4G: ".$this->k4g."\nMasa aktif: ".$this->aktif."\n*Nomor hp tujuan: ".$transaksi['tujuan']."*\n\n2⃣ Informasi Pembayaran\n*Total pembayaran: Rp".number_format($transaksi['hargaBayar'], 0, ',', '.')."*\n".$pembayaran."\n\n98. Hapus dari keranjang".$this->kembali.$this->awal;
+
+	}
+
+}

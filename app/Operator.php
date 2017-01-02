@@ -19,6 +19,7 @@ class Operator extends Model
         'syarat',
         'cekNomor',
         'cekKuota',
+        'isKuotaSupported',
     ];
 
     /**
