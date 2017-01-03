@@ -22,6 +22,7 @@ use App\Libraries\EnvayaSMS\EnvayaSMS_Event_Send;
 
 #DB
 use App\Operator;
+use App\Transaksi;
 use App\Kuota;
 use App\XMPPQuery;
 
