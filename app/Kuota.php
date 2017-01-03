@@ -26,6 +26,7 @@ class Kuota extends Model
         'gb4g',
         'days',
         'is24jam',
+        'expired',
     ];
 
     /**

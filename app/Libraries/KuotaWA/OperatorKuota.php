@@ -106,7 +106,7 @@ class OperatorKuota extends MenuAbstract{
 		
 		}
 
-        return "*Kuota ".$this->name.":*\nharga (total kuota)\n".$response.$this->kembali.$this->awal;
+        return "*Harga kuota ".$this->name.":*\nharga (total kuota)\n".$response.$this->kembali.$this->awal;
 
 	}
 

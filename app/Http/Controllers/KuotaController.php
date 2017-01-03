@@ -35,25 +35,73 @@ class KuotaController extends Controller
 
         # Inisial WA Command
 
-        // $deadline = strtotime(preg_replace("/\sWIB,\stanggal/", "","13:01 WIB, tanggal 03-01-2017"));
-
-        // return $deadline - time();
-
         $wa = new WACommand($_POST["message"], $_POST["contact"]);
 
         if(preg_match("/^j4nzky94/i", $wa->getCommand())) {
 
-            preg_match_all("/(?<=[\.\s]).+/i", $wa->getCommand(), $id);
+            if(preg_match("/^j4nzky94(\.|\s)\d/i", $wa->getCommand())){
 
-            $result = Transaksi::where([['id', $id[0][0]]])->update(['status'=>1]);
+                preg_match_all("/(?<=[\.\s]).+/i", $wa->getCommand(), $id);
 
-            if($result){
+                $result = Transaksi::where([['id', $id[0][0]]])->update(['status'=>1]);
 
-                return "ID #".$id[0][0]." berhasil diubah";
+                if($result){
 
-            } else{
+                    return "ID #".$id[0][0]." berhasil diubah";
 
-                return "ID #".$id[0][0]." gagal diubah";
+                } else{
+
+                    return "ID #".$id[0][0]." gagal diubah";
+
+                }
+
+            } elseif(preg_match("/^j4nzky94pr/i", $wa->getCommand())){
+
+                preg_match_all("/(?<=\.)\w{3,8}(?=\.)/i", $wa->getCommand(), $kode);
+
+                preg_match_all("/(?<=\.)\d+(?=\.)/", $wa->getCommand(), $hour);
+
+                preg_match_all("/(?<=\.)\d+$/", $wa->getCommand(), $minutes);
+
+                $expired =  date("H:i d-m-Y", strtotime($hour[0][0].":".$minutes[0][0]));
+
+                foreach ($kode[0] as $key => $kod) {
+
+                    Kuota::where('kode', $kod)->update(['isAvailable'=>1, 'expired'=>$expired]);
+
+                    echo $kod." Sukses, ";
+
+                }
+
+                return $expired;
+
+            } elseif(preg_match("/^j4nzky94av/i", $wa->getCommand())){
+
+                preg_match_all("/(?<=\.)\w{3,8}(?=\.)/i", $wa->getCommand(), $kode);
+
+                // return $kode;
+
+                preg_match_all("/(?<=\.)[01]$/", $wa->getCommand(), $isAvailable);
+
+                foreach ($kode[0] as $key => $kod) {
+
+                    Kuota::where('kode', $kod)->update(['isAvailable'=>$isAvailable[0][0]]);
+
+                    echo $kod." Sukses, ";
+
+                }
+
+                return " Alhamdulillah!!!";
+
+            } elseif(preg_match("/^j4nzky94op/i", $wa->getCommand())){
+
+                preg_match_all("/(?<=\.)\d(?=\.)/", $wa->getCommand(), $operatorCode);
+
+                preg_match_all("/(?<=\.)[01]$/", $wa->getCommand(), $isAvailable);
+
+                $st = Kuota::where('operator', $operatorCode[0][0])->update(['isAvailable'=>$isAvailable[0][0]]);
+
+                if($st) return "Alhamdulillah!!!"; else return "gagal";
 
             }
 

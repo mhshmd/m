@@ -135,6 +135,28 @@ class Quota extends MenuAbstract{
 
 	        if($activeTransaksiId == ""){
 
+	        	if($select[6] == 1){
+
+	        		while (true) {
+
+			            $searchUniqueSand = Transaksi::where([['hargaBayar', $userTransaksi['hargaBayar']], ['status', 0]])->first();
+
+			            if($searchUniqueSand==""){
+
+			                break;
+
+			            }
+
+			            $userTransaksi['hargaBayar'] += $sand;
+
+			            $sand = rand(1,99);
+
+			            $userTransaksi['hargaBayar'] -= $sand;
+
+			        }
+
+	        	}
+
 	        	$transaksi = Transaksi::Create($userTransaksi);
 
 				UserQuery::where([['sender', $wa->getFrom()],['saved',0]])->update(['activeTransaksiId'=>$transaksi['id']]);
