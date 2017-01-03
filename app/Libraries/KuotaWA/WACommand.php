@@ -32,8 +32,6 @@ class WACommand extends CommandAbstract{
         
         $this->from = preg_replace("/\s/", "",$this->from);
         
-        $this->from = preg_replace("/\D/", "",$this->from);
-        
         return $this->from;
     
     }
