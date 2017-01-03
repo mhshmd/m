@@ -6,6 +6,7 @@ namespace App\Libraries\KuotaWA;
 use App\Kuota;
 use App\UserQuery;
 use App\Transaksi;
+use App\Operator;
 
 #Library
 use App\Libraries\KuotaWA\Email;
@@ -75,7 +76,7 @@ class Quota extends MenuAbstract{
 
 				return "Nomor yang Anda masukkan bukan nomor ".$this->operatorName."\n\n*Mohon masukkan nomor Anda lagi:*\n".$this->kembali.$this->awal;
 
-			} elseif(strlen($select[5])<10){
+			} elseif(strlen($select[5])<10|strlen($select[5])>12){
 
 				array_pop($select);
 
@@ -140,6 +141,20 @@ class Quota extends MenuAbstract{
 
 	        } else {
 
+		        	$status = Transaksi::where([['id', $activeTransaksiId]])->select('status')->value('status');
+
+		        	if($status == 1) {
+
+					array_splice($select, 4);
+
+					UserQuery::where([['sender', $wa->getFrom()],['saved',0]])->update(['commandArray'=>serialize($select), 'activeTransaksiId'=>NULL]);
+
+	        		$cekKuota = Operator::where('name', $this->operatorName)->value('cekKuota');
+
+	        		return "Konfirmasi telah diterima dan kuota sudah dikirim. Terima kasih.\nCek kuota ".$this->operatorName." : ".$cekKuota."\n\n99. Menu kuota ".$this->operatorName.$this->awal;
+
+	        	}
+
 	        	if($transaksi['pmethod']!=$select[6]){
 
 	        		if($select[6]==2){
@@ -164,7 +179,7 @@ class Quota extends MenuAbstract{
 
 	        if($select[6]==2){
 
-	        	$mail = new Email("COD ".$wa->getFrom(),"ID Pesanan : ".$transaksi['id']."Kode : ".$this->kode."\nNama paket : ".$this->paketName."\nKuota umum: ".$this->umum."\nKhusus 4G: ".$this->k4g."\nMasa aktif: ".$this->aktif."\nNomor tujuan : ".$select[5]."\nHarga bayar : ".number_format(($this->hargaJual), 0, ',', '.'));
+	        	$mail = new Email("COD ".$wa->getFrom(),"ID Pesanan : ".$transaksi['id']."\nKode : ".$this->kode."\nNama paket : ".$this->paketName."\nKuota umum: ".$this->umum."\nKhusus 4G: ".$this->k4g."\nMasa aktif: ".$this->aktif."\nNomor tujuan : ".$select[5]."\nHarga bayar : ".number_format(($this->hargaJual), 0, ',', '.'));
 
                 if (!$mail->send()) {
 

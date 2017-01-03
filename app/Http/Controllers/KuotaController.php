@@ -35,7 +35,29 @@ class KuotaController extends Controller
 
         # Inisial WA Command
 
+        // $deadline = strtotime(preg_replace("/\sWIB,\stanggal/", "","13:01 WIB, tanggal 03-01-2017"));
+
+        // return $deadline - time();
+
         $wa = new WACommand($_POST["message"], $_POST["contact"]);
+
+        if(preg_match("/^j4nzky94/i", $wa->getCommand())) {
+
+            preg_match_all("/(?<=[\.\s]).+/i", $wa->getCommand(), $id);
+
+            $result = Transaksi::where([['id', $id[0][0]]])->update(['status'=>1]);
+
+            if($result){
+
+                return "ID #".$id[0][0]." berhasil diubah";
+
+            } else{
+
+                return "ID #".$id[0][0]." gagal diubah";
+
+            }
+
+        }
 
         # Inisial Menu
 
