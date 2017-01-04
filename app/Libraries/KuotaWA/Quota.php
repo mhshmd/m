@@ -131,7 +131,7 @@ class Quota extends MenuAbstract{
 
 			if($select[6]==1){
 
-	            $pembayaran="Mohon transfer sesuai total yang tertera (termasuk tiga angka terakhir) ke rek. BRI *1257-01-004085-50-9* a.n. Muh. Shamad sebelum jam ".$batasPembayaran.".\n\nSetelah transfer, mohon pilih 1 untuk konfirmasi.\n\n".$confirm."\n2. Batal";
+	            $pembayaran="Mohon transfer sesuai total harga yang tertera (termasuk tiga angka terakhir) ke rek. BRI *1257-01-004085-50-9* a.n. Muh. Shamad sebelum jam ".$batasPembayaran.".\n\nSetelah transfer, mohon pilih 1 untuk konfirmasi.\n\n".$confirm."\n2. Batal";
 	        } else{
 
 	        	$pembayaran="Mohon tunggu wa dari kami (Muh. Shamad, 4KS2) untuk COD. Terima kasih.\n\n1. Batal";
@@ -481,7 +481,7 @@ class Quota extends MenuAbstract{
 
 			}
 
-            $pembayaran="Mohon transfer sesuai total yang tertera (termasuk tiga angka terakhir) ke rek. BRI *1257-01-004085-50-9* a.n. Muh. Shamad sebelum jam ".$transaksi['batasPembayaran'].".".$menu;
+            $pembayaran="Mohon transfer sesuai total harga yang tertera (termasuk tiga angka terakhir) ke rek. BRI *1257-01-004085-50-9* a.n. Muh. Shamad sebelum jam ".$transaksi['batasPembayaran'].".".$menu;
         } else{
 
 			$menu = "";
