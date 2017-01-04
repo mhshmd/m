@@ -189,7 +189,7 @@ class KuotaController extends Controller
 
                     $menuAwal = new MenuAwal(0, 'Menu awal');
 
-                    $kuota = new MenuKuota(1, 'Kuota');
+                    $kuota = new MenuKuota(1, 'Kuota', $sms->getFrom());
                     
                     $keranjang = new Keranjang(2, 'Keranjang belanja', $sms->getFrom());
 
