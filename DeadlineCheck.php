@@ -18,7 +18,7 @@ if (!$conn) {
 
 }
 
-$sql = "SELECT id,batasPembayaran FROM transaksi WHERE status = '0' AND confirmed!='1'";
+$sql = "SELECT id,batasPembayaran FROM transaksi WHERE status = '0' AND confirmed!='1' AND pmethod!='2'";
 
 $result = mysqli_query($conn, $sql);
 
