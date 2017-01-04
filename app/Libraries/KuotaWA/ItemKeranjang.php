@@ -106,7 +106,7 @@ class ItemKeranjang extends MenuAbstract{
 
 						$kuota = new Quota(1, $operatorName['name'], $this->kode, $activeQuota->name, $activeQuota->isPromo, $activeQuota->hargaJual, $activeQuota->gb3g, $activeQuota->gb4g, $activeQuota->days, $operatorName['cekNomor']);
 
-						$mail = new Email("Konfirmasi ".$wa->getFrom(),"Harga bayar : ".number_format($this->hargaBayar, 0, ',', '.')."\nID pesanan : ".$this->id."\nKode : ".$this->kode."\nNama paket : ".$activeQuota->paketName."\nKuota umum: ".$kuota->umum."\nKhusus 4G: ".$kuota->k4g."\nMasa aktif: ".$kuota->aktif."\nNomor tujuan : ".$this->tujuan);
+						$mail = new Email("Konfirmasi ".$wa->getFrom(),"Harga bayar : ".number_format($this->hargaBayar, 0, ',', '.')."\nID pesanan : ".$this->id."\nKode : ".$this->kode."\nNama paket : ".$activeQuota->name."\nKuota umum: ".$kuota->umum."\nKhusus 4G: ".$kuota->k4g."\nMasa aktif: ".$kuota->aktif."\nNomor tujuan : ".$this->tujuan);
 
 		                if(!$mail->send()){
 

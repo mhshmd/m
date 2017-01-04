@@ -4,20 +4,24 @@ namespace App\Libraries\KuotaWA;
 
 #DB
 use App\UserQuery;
+use App\Kuota;
+use App\Operator;
 
 class OperatorKuota extends MenuAbstract{
 
-	public $cekNomor;
+	public $cekNomor, $from;
 
 	public $subMenuPromo = array();
 
-	public function __construct($position, $name, $cekNomor){
+	public function __construct($position, $name, $cekNomor, $from){
 
 		$this->position = $position;
 		
 		$this->name = $name;
 		
 		$this->cekNomor = $cekNomor;
+		
+		$this->from = $from;
 
 	}
 
@@ -43,21 +47,31 @@ class OperatorKuota extends MenuAbstract{
 
 	public function select($select,$wa){
 
-		$all = $this->subMenu + $this->subMenuPromo;
+		$currentKuotaList = UserQuery::where([['sender', $this->from],['saved',0]])->value('currentKuotaList');
 
-		if(!isset($all[$select[3]])){
+		$currentKuotaList = unserialize($currentKuotaList);
+
+		if(!isset($currentKuotaList[$select[3]])){
 
 			return $this->wrongCommand($select, $wa);
 		
 		}
 
-		$selectedQuota = $all[$select[3]];
+		$quo = Kuota::where('kode', $currentKuotaList[$select[3]])->select('name', 'kode', 'isPromo', 'hargaJual', 'gb3g', 'gb4g', 'days', 'operator')->first();
+
+		$selectedOperator = Operator::where('id', $quo->operator)->select('name', 'cekNomor')->first();
+
+		$selectedQuota = new Quota(1, $selectedOperator['name'], $quo->kode, $quo->name, $quo->isPromo, $quo->hargaJual, $quo->gb3g, $quo->gb4g, $quo->days, $selectedOperator['cekNomor']);
 
         if(count($select)==4){
 
         	$isSaved = UserQuery::where([['sender', $wa->getFrom()],['saved',0], ['activeTransaksiId', NULL]])->first();
 
     		if($isSaved == ""){
+
+	            $currentKuotaList = UserQuery::where([['sender', $wa->getFrom()],['saved',0]])->value('currentKuotaList');
+
+	            $newUserCommands['currentKuotaList'] = $currentKuotaList;
 
     			UserQuery::where([['sender', $wa->getFrom()],['saved',0]])->update(['saved'=>1]);
 
@@ -82,17 +96,25 @@ class OperatorKuota extends MenuAbstract{
 
 	public function showMenu(){
 
+		$currentKuotaList = array();
+
 		$subMenuNames1 = array_map(create_function('$o', 'return $o->name;'), $this->getSubMenu());
+
+		$subMenuNames1Kode = array_map(create_function('$o', 'return $o->kode;'), $this->getSubMenu());
 
         $response ="";
         
         foreach ($subMenuNames1 as $key => $name) {
         
             $response.=($key).". ".$name."\n";
+
+            $currentKuotaList[$key] = $subMenuNames1Kode[$key];
         
         }
 
 		$subMenuNames2 = array_map(create_function('$o', 'return $o->name;'), $this->getSubMenuPromo());
+
+		$subMenuNames2Kode = array_map(create_function('$o', 'return $o->kode;'), $this->getSubMenuPromo());
 		
 		if(sizeof($subMenuNames2)>0){
 		
@@ -101,10 +123,14 @@ class OperatorKuota extends MenuAbstract{
 	        foreach ($subMenuNames2 as $key => $name) {
 	    
 	            $response.=($key).". ".$name."\n";
+
+            	$currentKuotaList[$key] = $subMenuNames2Kode[$key];
 	    
 	        }
 		
 		}
+
+    	UserQuery::where([['sender', $this->from],['saved',0]])->update(['currentKuotaList'=>serialize($currentKuotaList)]);
 
         return "*Harga kuota ".$this->name.":*\nharga (total kuota)\n".$response.$this->kembali.$this->awal;
 

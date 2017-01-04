@@ -20,6 +20,7 @@ class UserQuery extends Model
         'saved',
         'tujuan',
         'platform',
+        'currentKuotaList',
     ];
 
     /**

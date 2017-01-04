@@ -9,7 +9,7 @@ use App\UserQuery;
 
 class MenuKuota extends MenuAbstract{
 
-	public function __construct($position, $name){
+	public function __construct($position, $name, $from){
 
 		$this->position = $position;
 		$this->name = $name;
@@ -17,7 +17,7 @@ class MenuKuota extends MenuAbstract{
 		$operators = Operator::where('isKuotaSupported', 1)->select('name', 'cekNomor')->get();
         foreach ($operators as $key => $operator) {
 
-            $this->subMenu[$key+1] = new OperatorKuota(($key+1), $operator->name, $operator->cekNomor);            
+            $this->subMenu[$key+1] = new OperatorKuota(($key+1), $operator->name, $operator->cekNomor, $from);            
 
         }
 

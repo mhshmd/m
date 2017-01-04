@@ -72,7 +72,7 @@ if (mysqli_num_rows($promoResult) > 0) {
 
         } else {
 
-            echo $row["kode"]." belum deadline <br>"
+            echo $row["kode"]." belum deadline <br>";
 
         }
 

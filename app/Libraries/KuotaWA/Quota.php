@@ -62,7 +62,22 @@ class Quota extends MenuAbstract{
 
 			return $this->wrongCommand($select, $wa);
 
-		} elseif (count($select)==5) {
+		}
+
+		$isAvailable = Kuota::where([['kode', $this->kode]])->value('isAvailable');
+
+		if($isAvailable==0&&count($select)<8){
+
+			array_splice($select, 4);
+
+			UserQuery::where([['sender', $wa->getFrom()],['saved',0]])->update(['commandArray'=>serialize($select), 'activeTransaksiId'=>NULL]);
+
+			return "Maaf, paket ini baru saja tidak tersedia. Jika Anda berhasil memesan paket ini sebelumnya, pesanan dapat dilihat di menu Keranjang belanja dan tetap akan diproses saat tersedia. Terima kasih.\n\n(hal ini terjadi biasanya karena operator sedang terganggu atau terjadi pada paket promo. Untuk bantuan, wa/sms: 082311897547)\n\n99. Menu kuota ".$this->operatorName.$this->awal;
+
+		}
+
+
+		if(count($select)==5) {
 
 			return $this->beli();
 
@@ -370,27 +385,41 @@ class Quota extends MenuAbstract{
 
 	public function showMenu(){
 
-		$kuota = Kuota::where([['kode', $this->kode]])->select('name', 'operator', 'isAvailable', 'isPromo', 'deskripsi', 'days', 'is24jam')->first();
+		$kuota = Kuota::where([['kode', $this->kode]])->select('name', 'operator', 'isAvailable', 'isPromo', 'deskripsi', 'days', 'is24jam', 'expired')->first();
 
         if(($kuota->is24jam)==0) $this->umum.=" (berbagi waktu, lihat deskripsi)";
 
         $status = "";
 
+        $beli = "1. Beli\n";
+
         if($kuota->isAvailable==1){
 
-            $status = "Tersedia";
+        	if(is_null($kuota->expired)){
+
+            	$status = "Tersedia";
+
+        	} else {
+
+        		$status = "Tersedia sampai jam ".$kuota->expired." (WIB)";
+
+        	}
 
         }elseif($kuota->isAvailable==0){
 
             $status = "Kosong";
 
+            $beli = "";
+
         } else{
 
             $status = "Gangguan";
 
+            $beli = "";
+
         }
 
-        return "📋 ".$kuota->name."\n*Kuota*\nUmum: ".$this->umum."\nKhusus 4G: ".$this->k4g."\n\n*Harga*\nRp".number_format($this->hargaJual, 0, ',', '.')."\n\n*Info tambahan*\nStatus: ".$status."\nOperator: ".$this->operatorName."\nMasa aktif: ".$this->aktif."\nDeskripsi:\n".$kuota->deskripsi."\n\n1. Beli\n".$this->kembali.$this->awal;
+        return "📋 ".$kuota->name."\n*Kuota*\nUmum: ".$this->umum."\nKhusus 4G: ".$this->k4g."\n\n*Harga*\nRp".number_format($this->hargaJual, 0, ',', '.')."\n\n*Info tambahan*\nStatus: ".$status."\nOperator: ".$this->operatorName."\nMasa aktif: ".$this->aktif."\nDeskripsi:\n".$kuota->deskripsi."\n\n".$beli.$this->kembali.$this->awal;
 
 	}
 
