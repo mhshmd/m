@@ -149,7 +149,7 @@ class Keranjang extends MenuAbstract{
 
 		if($response!=""){
 
-        	return "*Keranjang belanja:*\nNomor hp tujuan (harga)\n".$response."\n98. Kosongkan keranjang".$this->awal;
+        	return "*Keranjang belanja:*\nNomor tujuan (harga)\n".$response."\n98. Kosongkan keranjang".$this->awal;
 
 		} else {
 

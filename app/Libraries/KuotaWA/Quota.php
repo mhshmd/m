@@ -119,19 +119,19 @@ class Quota extends MenuAbstract{
 
 	        $transaksi = "";
 
-			$confirm = "Konfirmasi";
+			$confirm = "*1. Konfirmasi*";
 
 	        if($activeTransaksiId != ""){
 
 	        	$transaksi = Transaksi::where([['id', $activeTransaksiId]])->first();
 
-                if($transaksi['confirmed']==1) $confirm = "Konfirmasi ulang";
+                if($transaksi['confirmed']==1) $confirm = "1. Konfirmasi ulang";
 
 	        } 
 
 			if($select[6]==1){
 
-	            $pembayaran="Mohon transfer sesuai total yang tertera (termasuk tiga angka terakhir) ke rekening berikut:\n💳 *Norek: 1257-01-004085-50-9*\n*a.n.: MUH. SHAMAD*\n⏱ *Batas transfer: ".$batasPembayaran."*\nSetelah transfer, mohon pilih 1 untuk konfirmasi.\n\n1. ".$confirm."\n2. Batal";
+	            $pembayaran="Mohon transfer sesuai total yang tertera (termasuk tiga angka terakhir) ke rek. BRI *1257-01-004085-50-9* a.n. Muh. Shamad sebelum jam ".$batasPembayaran.".\n\nSetelah transfer, mohon pilih 1 untuk konfirmasi.\n\n".$confirm."\n2. Batal";
 	        } else{
 
 	        	$pembayaran="Mohon tunggu wa dari kami (Muh. Shamad, 4KS2) untuk COD. Terima kasih.\n\n1. Batal";
@@ -226,7 +226,9 @@ class Quota extends MenuAbstract{
 
 	        }
 
-			return "✅ Pemesanan berhasil\n\n1⃣Informasi Pemesanan\nID pesanan: ".$transaksi['id']."\nNama paket: ".$this->paketName."\nKuota umum: ".$this->umum."\nKhusus 4G: ".$this->k4g."\nMasa aktif: ".$this->aktif."\n*Nomor hp tujuan: ".$userTransaksi['tujuan']."*\n\n2⃣Informasi Pembayaran\n*Total pembayaran: Rp".number_format($transaksi['hargaBayar'], 0, ',', '.')."*\n".$pembayaran."\n\n99. Ubah cara pembayaran".$this->awal;
+	        return "✅ Pemesanan berhasil\n\n📝 *Info Pemesanan*\nID pesanan: ".$transaksi['id']."\nNama paket: ".$this->paketName."\nKuota umum: ".$this->umum."\nKhusus 4G: ".$this->k4g."\nMasa aktif: ".$this->aktif."\n\nNomor tujuan: *".$userTransaksi['tujuan']."*\nTotal harga: *Rp".number_format($transaksi['hargaBayar'], 0, ',', '.')."*\n\n".$pembayaran."\n\n99. Ubah cara bayar".$this->awal;
+
+			//return "✅ Pemesanan berhasil\n\n1⃣ Informasi Pemesanan\nID pesanan: ".$transaksi['id']."\nNama paket: ".$this->paketName."\nKuota umum: ".$this->umum."\nKhusus 4G: ".$this->k4g."\nMasa aktif: ".$this->aktif."\n*Nomor hp tujuan: ".$userTransaksi['tujuan']."*\n\n2⃣ Informasi Pembayaran\n*Total pembayaran: Rp".number_format($transaksi['hargaBayar'], 0, ',', '.')."*\n".$pembayaran."\n\n99. Ubah cara pembayaran".$this->awal;
 
 		} elseif(count($select)==8 && preg_match("/[123]/", $select[7])){
 
@@ -323,7 +325,7 @@ class Quota extends MenuAbstract{
 
 	public function beli(){
 
-		return "*Masukkan nomor hp tujuan:*\n(contoh: 082311897547)\n\n(cek nomor ".$this->operatorName.": ".$this->cekNomor.")\n".$this->kembali.$this->awal;
+		return "*Masukkan nomor tujuan:*\n(contoh: 082311897547)\n\n(cek nomor ".$this->operatorName.": ".$this->cekNomor.")\n".$this->kembali.$this->awal;
 		
 	}
 
@@ -419,7 +421,7 @@ class Quota extends MenuAbstract{
 
         }
 
-        return "📋 ".$kuota->name."\n*Kuota*\nUmum: ".$this->umum."\nKhusus 4G: ".$this->k4g."\n\n*Harga*\nRp".number_format($this->hargaJual, 0, ',', '.')."\n\n*Info tambahan*\nStatus: ".$status."\nOperator: ".$this->operatorName."\nMasa aktif: ".$this->aktif."\nDeskripsi:\n".$kuota->deskripsi."\n\n".$beli.$this->kembali.$this->awal;
+        return "📋 Paket ".$kuota->name."\n*Kuota*\nUmum: ".$this->umum."\nKhusus 4G: ".$this->k4g."\n\n*Harga*\nRp".number_format($this->hargaJual, 0, ',', '.')."\n\n*Info tambahan*\nStatus: ".$status."\nOperator: ".$this->operatorName."\nMasa aktif: ".$this->aktif."\nDeskripsi:\n".$kuota->deskripsi."\n\n".$beli.$this->kembali.$this->awal;
 
 	}
 
@@ -443,15 +445,15 @@ class Quota extends MenuAbstract{
 
 			}  elseif ($transaksi['confirmed']==0) {
 
-	        	$menu = "\nSetelah transfer, mohon pilih 1 untuk konfirmasi.\n\n1. Konfirmasi\n2. Batal";
+	        	$menu = "\n\nSetelah transfer, mohon pilih 1 untuk konfirmasi.\n\n*1. Konfirmasi*\n2. Batal";
 
 			} else {
 
-				$menu = "\nSetelah transfer, mohon pilih 1 untuk konfirmasi.\n\n1. Konfirmasi ulang\n2. Batal";
+				$menu = "\n\nSetelah transfer, mohon pilih 1 untuk konfirmasi.\n\n1. Konfirmasi ulang\n2. Batal";
 
 			}
 
-            $pembayaran="Mohon transfer sesuai total yang tertera (termasuk tiga angka terakhir) ke rekening berikut:\n💳 *Norek: 1257-01-004085-50-9*\n*a.n.: MUH. SHAMAD*\n⏱ *Batas transfer: ".$transaksi['batasPembayaran']."*".$menu;
+            $pembayaran="Mohon transfer sesuai total yang tertera (termasuk tiga angka terakhir) ke rek. BRI *1257-01-004085-50-9* a.n. Muh. Shamad sebelum jam ".$transaksi['batasPembayaran'].".".$menu;
         } else{
 
 			$menu = "";
@@ -474,7 +476,10 @@ class Quota extends MenuAbstract{
 
         }
 
-		return "1⃣ Informasi Pemesanan\nID pesanan: ".$transaksiId."\nNama paket: ".$this->paketName."\nKuota umum: ".$this->umum."\nKhusus 4G: ".$this->k4g."\nMasa aktif: ".$this->aktif."\n*Nomor hp tujuan: ".$transaksi['tujuan']."*\n\n2⃣ Informasi Pembayaran\n*Total pembayaran: Rp".number_format($transaksi['hargaBayar'], 0, ',', '.')."*\n".$pembayaran."\n\n98. Hapus dari keranjang".$this->kembali.$this->awal;
+		return "📝 *Info Pemesanan*\nID pesanan: ".$transaksiId."\nNama paket: ".$this->paketName."\nKuota umum: ".$this->umum."\nKhusus 4G: ".$this->k4g."\nMasa aktif: ".$this->aktif."\n\nNomor tujuan: *".$transaksi['tujuan']."*\nTotal harga: *Rp".number_format($transaksi['hargaBayar'], 0, ',', '.')."*\n\n".$pembayaran."\n\n98. Hapus dari keranjang".$this->kembali.$this->awal;
+
+
+		// return "1⃣  Informasi Pemesanan\nID pesanan: ".$transaksiId."\nNama paket: ".$this->paketName."\nKuota umum: ".$this->umum."\nKhusus 4G: ".$this->k4g."\nMasa aktif: ".$this->aktif."\n*Nomor hp tujuan: ".$transaksi['tujuan']."*\n\n2⃣  Informasi Pembayaran\n*Total pembayaran: Rp".number_format($transaksi['hargaBayar'], 0, ',', '.')."*\n".$pembayaran."\n\n98. Hapus dari keranjang".$this->kembali.$this->awal;
 
 	}
 
