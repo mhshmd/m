@@ -202,11 +202,39 @@ class Quota extends MenuAbstract{
 
 	        		} else {
 
-	        			$hargaActiveTransaksi = Transaksi::where([['id', $activeTransaksiId]])->value('hargaBayar');
+	        			$hargaActiveTransaksi = Transaksi::where([['id', $activeTransaksiId]])->select('hargaBayar', 'harga')->first();
 
-	        			Transaksi::where([['id', $activeTransaksiId]])->update(['pmethod'=>$select[6]]);
+	        			if($hargaActiveTransaksi['hargaBayar'] == $hargaActiveTransaksi['harga']){
 
-	        			$transaksi['hargaBayar'] = $hargaActiveTransaksi;
+	        				while (true) {
+
+					            $searchUniqueSand = Transaksi::where([['hargaBayar', $userTransaksi['hargaBayar']], ['status', 0]])->first();
+
+					            if($searchUniqueSand==""){
+
+					                break;
+
+					            }
+
+					            $userTransaksi['hargaBayar'] += $sand;
+
+					            $sand = rand(1,99);
+
+					            $userTransaksi['hargaBayar'] -= $sand;
+
+					        }
+
+	        				Transaksi::where([['id', $activeTransaksiId]])->update(['pmethod'=>$select[6], 'hargaBayar'=>$userTransaksi['hargaBayar']]);
+
+	        				$transaksi['hargaBayar'] = $userTransaksi['hargaBayar'];
+
+	        			} else {
+
+	        				Transaksi::where([['id', $activeTransaksiId]])->update(['pmethod'=>$select[6]]);
+
+	        				$transaksi['hargaBayar'] = $hargaActiveTransaksi['hargaBayar'];
+
+	        			}
 
 	        		}
 
@@ -226,7 +254,7 @@ class Quota extends MenuAbstract{
 
 	        }
 
-	        return "✅ Pemesanan berhasil\n\n📝 *Info Pemesanan*\nID pesanan: ".$transaksi['id']."\nNama paket: ".$this->paketName."\nKuota umum: ".$this->umum."\nKhusus 4G: ".$this->k4g."\nMasa aktif: ".$this->aktif."\n\nNomor tujuan: *".$userTransaksi['tujuan']."*\nTotal harga: *Rp".number_format($transaksi['hargaBayar'], 0, ',', '.')."*\n\n".$pembayaran."\n\n99. Ubah cara bayar".$this->awal;
+	        return "✅ Pemesanan berhasil\n\n📝 *Info Pesanan*\nID pesanan: ".$transaksi['id']."\nNama paket: ".$this->paketName."\nKuota umum: ".$this->umum."\nKhusus 4G: ".$this->k4g."\nMasa aktif: ".$this->aktif."\n\nNomor tujuan: *".$userTransaksi['tujuan']."*\nTotal harga: *Rp".number_format($transaksi['hargaBayar'], 0, ',', '.')."*\n\n".$pembayaran."\n\n99. Ubah cara bayar".$this->awal;
 
 			//return "✅ Pemesanan berhasil\n\n1⃣ Informasi Pemesanan\nID pesanan: ".$transaksi['id']."\nNama paket: ".$this->paketName."\nKuota umum: ".$this->umum."\nKhusus 4G: ".$this->k4g."\nMasa aktif: ".$this->aktif."\n*Nomor hp tujuan: ".$userTransaksi['tujuan']."*\n\n2⃣ Informasi Pembayaran\n*Total pembayaran: Rp".number_format($transaksi['hargaBayar'], 0, ',', '.')."*\n".$pembayaran."\n\n99. Ubah cara pembayaran".$this->awal;
 
@@ -476,7 +504,7 @@ class Quota extends MenuAbstract{
 
         }
 
-		return "📝 *Info Pemesanan*\nID pesanan: ".$transaksiId."\nNama paket: ".$this->paketName."\nKuota umum: ".$this->umum."\nKhusus 4G: ".$this->k4g."\nMasa aktif: ".$this->aktif."\n\nNomor tujuan: *".$transaksi['tujuan']."*\nTotal harga: *Rp".number_format($transaksi['hargaBayar'], 0, ',', '.')."*\n\n".$pembayaran."\n\n98. Hapus dari keranjang".$this->kembali.$this->awal;
+		return "📝 *Info Pesanan*\nID pesanan: ".$transaksiId."\nNama paket: ".$this->paketName."\nKuota umum: ".$this->umum."\nKhusus 4G: ".$this->k4g."\nMasa aktif: ".$this->aktif."\n\nNomor tujuan: *".$transaksi['tujuan']."*\nTotal harga: *Rp".number_format($transaksi['hargaBayar'], 0, ',', '.')."*\n\n".$pembayaran."\n\n98. Hapus dari keranjang".$this->kembali.$this->awal;
 
 
 		// return "1⃣  Informasi Pemesanan\nID pesanan: ".$transaksiId."\nNama paket: ".$this->paketName."\nKuota umum: ".$this->umum."\nKhusus 4G: ".$this->k4g."\nMasa aktif: ".$this->aktif."\n*Nomor hp tujuan: ".$transaksi['tujuan']."*\n\n2⃣  Informasi Pembayaran\n*Total pembayaran: Rp".number_format($transaksi['hargaBayar'], 0, ',', '.')."*\n".$pembayaran."\n\n98. Hapus dari keranjang".$this->kembali.$this->awal;
