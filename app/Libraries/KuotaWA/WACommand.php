@@ -6,7 +6,7 @@ class WACommand extends CommandAbstract{
 
     function __construct($message, $contact) {
 
-        $message = preg_replace("/^\s*/", "",$message);
+        $message = preg_replace("/[^a-zA-Z0-9]/", "",$message);;//preg_replace("/^\s*/", "",$message);
 
         #$message kosong = 8
 
@@ -26,11 +26,11 @@ class WACommand extends CommandAbstract{
 
     function getFrom(){
         
-        $this->from = preg_replace("/-/", "",$this->from);
+        // $this->from = preg_replace("/-/", "",$this->from);
         
-        $this->from = preg_replace("/62/", "0",$this->from);
+        // $this->from = preg_replace("/62/", "0",$this->from);
         
-        $this->from = preg_replace("/\s/", "",$this->from);
+        // $this->from = preg_replace("/\s/", "",$this->from);
         
         $this->from = preg_replace("/[^a-zA-Z0-9]/", "",$this->from);
         

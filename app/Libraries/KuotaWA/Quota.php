@@ -91,13 +91,13 @@ class Quota extends MenuAbstract{
 
 				return "Nomor yang Anda masukkan bukan nomor ".$this->operatorName."\n\n*Mohon masukkan nomor Anda lagi:*\n".$this->kembali.$this->awal;
 
-			} elseif(strlen($select[5])<10|strlen($select[5])>12){
+			} elseif(strlen($select[5])<10|strlen($select[5])>13){
 
 				array_pop($select);
 
 		    	UserQuery::where([['sender', $wa->getFrom()],['saved',0]])->update(['commandArray'=>serialize($select)]);
 
-				return "Mohon masukkan 10 - 12 digit.\n\n*Mohon masukkan nomor Anda lagi:*\n".$this->kembali.$this->awal;
+				return "Mohon masukkan 10 - 13 digit.\n\n*Mohon masukkan nomor Anda lagi:*\n".$this->kembali.$this->awal;
 
 			}
 
