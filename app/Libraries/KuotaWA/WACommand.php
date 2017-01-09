@@ -6,7 +6,7 @@ class WACommand extends CommandAbstract{
 
     function __construct($message, $contact) {
 
-        $message = preg_replace("/[^a-zA-Z0-9]/", "",$message);;//preg_replace("/^\s*/", "",$message);
+        $message = preg_replace("/[^a-zA-Z0-9\.]/", "",$message);;//preg_replace("/^\s*/", "",$message);
 
         #$message kosong = 8
 
