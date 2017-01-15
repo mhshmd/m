@@ -35,13 +35,17 @@ class ProductCategorySubMenu extends MenuAbstract{
 
 		$allProduct = Product::where('category', $this->id)->get();
 
-		$subMenu = "*".$this->name.":*\n(kode)|(nama)|(harga)\n";
+		$subMenu = "*".$this->name.":*\nkode|nama|harga\n";
 
 		foreach ($allProduct as $key => $product) {
 			
-			$subMenu .= "- ".$product['kode']."|".$product['name']."|Rp".number_format($product['hargaJual'], 0, ',', '.')."\n";
+			$subMenu .= "- ".$product['kode']."|".$product['name']."|Rp".number_format($product['hargaJual'], 0, ',', '.')."\n\n";
 
 		}
+
+		$subMenu = preg_replace("/\s$/", "",$subMenu);
+
+		$subMenu .= "\n";
 
 		return $subMenu.$this->kembali.$this->awal;
 
