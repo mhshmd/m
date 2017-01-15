@@ -120,9 +120,15 @@ class KuotaController extends Controller
 
             return "Alhamdulillah berhasil...\nKelas : ".$kelas[0][0]."\nNama : ".$namaPJ[0][0]."\nHP : ".$hp[0][0];
 
-        } elseif(preg_match("/^po\./i", $wa->getCommand())){
+        } elseif(preg_match("/^po\d{3}\./i", $wa->getCommand())){
 
             preg_match_all("/(?<=[\.]).+/i", $wa->getCommand(), $kelas);
+
+            preg_match_all("/(?<=po)\d{3}/i", $wa->getCommand(), $endHp);
+
+            $validasi = Kelas::where([['kelas',$kelas[0][0]], ['hp', 'like', '%'.$endHp[0][0]]])->first();
+
+            if($validasi == "") return "Mohon Masukkan pilihan Anda lagi.";
 
             $report = PreOrderData::where([['kelas', $kelas[0][0]], ['pmethod', 2], ['statusPembayaran', "!=", 2]])->get();
 
@@ -148,9 +154,17 @@ class KuotaController extends Controller
 
             return $response;
 
-        } elseif(preg_match("/^poc\./i", $wa->getCommand())){
+        } elseif(preg_match("/^poc\d{3}\./i", $wa->getCommand())){
 
-            preg_match_all("/(?<=[\.]).+/i", $wa->getCommand(), $id);
+            preg_match_all("/(?<=poc)\d{3}/i", $wa->getCommand(), $endHp);
+
+            preg_match_all("/(?<=poc".$endHp[0][0]."\.).+(?=\.)/i", $wa->getCommand(), $kelas);
+
+            $validasi = Kelas::where([['hp', 'like', '%'.$endHp[0][0]], ['kelas', $kelas[0][0]]])->first();
+
+            if($validasi == "") return "Mohon Masukkan pilihan Anda lagi.";
+
+            preg_match_all("/(?<=".$kelas[0][0]."[\.]).+/i", $wa->getCommand(), $id);
 
             $itsOk = PreOrderData::where([['id', $id[0][0]], ['pmethod', 2]])->update(['statusPembayaran'=>1]);
 
@@ -164,7 +178,15 @@ class KuotaController extends Controller
 
             }
 
-        } elseif(preg_match("/^pouc\./i", $wa->getCommand())){
+        } elseif(preg_match("/^pouc\d{3}\./i", $wa->getCommand())){
+
+            preg_match_all("/(?<=pouc)\d{3}/i", $wa->getCommand(), $endHp);
+
+            preg_match_all("/(?<=pouc".$endHp[0][0]."\.).+(?=\.)/i", $wa->getCommand(), $kelas);
+
+            $validasi = Kelas::where([['hp', 'like', '%'.$endHp[0][0]], ['kelas', $kelas[0][0]]])->first();
+
+            if($validasi == "") return "Mohon Masukkan pilihan Anda lagi.";
 
             preg_match_all("/(?<=[\.]).+/i", $wa->getCommand(), $id);
 
