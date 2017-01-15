@@ -27,6 +27,7 @@ use App\Transaksi;
 use App\Kuota;
 use App\XMPPQuery;
 use App\Kelas;
+use App\PreOrderData;
 
 
 class KuotaController extends Controller
@@ -118,6 +119,66 @@ class KuotaController extends Controller
             Kelas::where('kelas', $kelas[0][0])->update(['pj'=>$namaPJ[0][0], 'hp'=>$hp[0][0]]);
 
             return "Alhamdulillah berhasil...\nKelas : ".$kelas[0][0]."\nNama : ".$namaPJ[0][0]."\nHP : ".$hp[0][0];
+
+        } elseif(preg_match("/^po\./i", $wa->getCommand())){
+
+            preg_match_all("/(?<=[\.]).+/i", $wa->getCommand(), $kelas);
+
+            $report = PreOrderData::where([['kelas', $kelas[0][0]], ['pmethod', 2], ['statusPembayaran', "!=", 2]])->get();
+
+            $response = "*Kelas ".$kelas[0][0].":*\n";
+
+            if($report != "[]"){
+
+                foreach ($report as $key => $order) {
+
+                    $status = "belum";
+
+                    if($order['statusPembayaran'] == 1) $status = "lunas";
+                    
+                    $response .= ($key+1).". #".$order['id']." ".$order['name']." (Rp".number_format($order['totalHarga'], 0, ',', '.').", ".$status.")\n";
+
+                }
+
+            } else{
+
+                $response .= "\n(kosong)";
+
+            }
+
+            return $response;
+
+        } elseif(preg_match("/^poc\./i", $wa->getCommand())){
+
+            preg_match_all("/(?<=[\.]).+/i", $wa->getCommand(), $id);
+
+            $itsOk = PreOrderData::where([['id', $id[0][0]], ['pmethod', 2]])->update(['statusPembayaran'=>1]);
+
+            if($itsOk == "1"){
+
+                return "#".$id[0][0]." berhasil dikonfirmasi...";
+
+            } else{
+
+                return "#".$id[0][0]." gagal dikonfirmasi, harap cek ID pemesan.";
+
+            }
+
+        } elseif(preg_match("/^pouc\./i", $wa->getCommand())){
+
+            preg_match_all("/(?<=[\.]).+/i", $wa->getCommand(), $id);
+
+            $itsOk = PreOrderData::where([['id', $id[0][0]], ['pmethod', 2]])->update(['statusPembayaran'=>0]);
+
+            if($itsOk == "1"){
+
+                return "#".$id[0][0]." berhasil diunconfirm...";
+
+            } else{
+
+                return "#".$id[0][0]." gagal diunconfirm, harap cek ID pemesan.";
+
+            }
 
         }
 
