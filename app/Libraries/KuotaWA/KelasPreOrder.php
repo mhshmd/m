@@ -221,7 +221,7 @@ class KelasPreOrder extends MenuAbstract{
 
 				$pjName = Kelas::where('kelas', $this->name)->value('pj');
 
-				$caraBayar = "Silahkan hubungi ".$pjName." (PJ ".$this->name.") untuk pembayaran. Terima kasih.\n\n1. Batal";
+				$caraBayar = "Silahkan hubungi ".$pjName." (PJ ".$this->name.") untuk pembayaran (batas pelunasan 18 Januari 2017). Terima kasih.\n\n1. Batal";
 
 			}
 
