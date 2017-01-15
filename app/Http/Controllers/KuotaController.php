@@ -379,7 +379,7 @@ class KuotaController extends Controller
                     # Run command sms
 
                     //KIRIM PESAN
-                    return $this->kirimPesanInject(preg_replace("/(\*(?=\w)|(?<=\w)\*|🎁\s?|📋\s?|✅\s?|📝\s?|⏱\s?)/", "",$menuAwal->run($sms)), $request);
+                    return $this->kirimPesanInject(preg_replace("/(\*(?=\w)|(?<=\w)\*|(?<=:)\*|🎁\s?|📋\s?|✅\s?|📝\s?|⏱\s?)/", "",$menuAwal->run($sms)), $request);
 
                     
                 } 

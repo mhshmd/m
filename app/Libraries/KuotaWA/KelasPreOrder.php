@@ -221,6 +221,12 @@ class KelasPreOrder extends MenuAbstract{
 
 				$pjName = Kelas::where('kelas', $this->name)->value('pj');
 
+				if($pjName == "Blm ditentukan"){
+
+					return "Maaf, kelas ".$this->name." belum memiliki PJ Pre-Order. Mohon tunggu beberapa saat lagi atau pilih cara pembayaran lain. Terima kasih.\n\n99. Ubah cara pembayaran".$this->awal;
+
+				}
+
 				$caraBayar = "Silahkan hubungi ".$pjName." (PJ ".$this->name.") untuk pembayaran (batas pelunasan 18 Januari 2017). Terima kasih.\n\n1. Batal";
 
 			}
