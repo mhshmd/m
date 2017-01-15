@@ -326,15 +326,31 @@ class KuotaController extends Controller
 
                     # Inisial Menu
 
+                    // $menuAwal = new MenuAwal(0, 'Menu awal');
+
+                    // $kuota = new MenuKuota(1, 'Kuota', $sms->getFrom());
+                    
+                    // $keranjang = new Keranjang(2, 'Keranjang belanja', $sms->getFrom());
+
+                    # Tambah Menu ke Menu Awal
+
+                    // $menuAwal->addSubMenu($kuota);
+                    
+                    // $menuAwal->addSubMenu($keranjang);
+
                     $menuAwal = new MenuAwal(0, 'Menu awal');
 
                     $kuota = new MenuKuota(1, 'Kuota', $sms->getFrom());
+
+                    $preOrder = new PreOrder(2, 'Pre-order (16-18 Jan)', $sms->getFrom());
                     
-                    $keranjang = new Keranjang(2, 'Keranjang belanja', $sms->getFrom());
+                    $keranjang = new Keranjang(3, 'Keranjang belanja', $sms->getFrom());
 
                     # Tambah Menu ke Menu Awal
 
                     $menuAwal->addSubMenu($kuota);
+
+                    $menuAwal->addSubMenu($preOrder);
                     
                     $menuAwal->addSubMenu($keranjang);
 
