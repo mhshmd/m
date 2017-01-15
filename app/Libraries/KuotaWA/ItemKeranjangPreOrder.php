@@ -127,6 +127,8 @@ class ItemKeranjangPreOrder extends MenuAbstract{
 
 		}
 
+		if($this->statusPembayaran == 1) $caraBayar = "✅ Pembayaran telah dicek dan berhasil diterima. Kami akan mengantarkan pesanan Kamu tgl 19-23 Januari. Terima kasih.";
+
 		return "📝 *Info Pesanan*\nNama : ".$this->customer."\nKelas : ".$this->kelas."\nTotal harga : Rp".number_format($this->harga, 0, ',', '.')."\n\n".$caraBayar."\n\n98. Hapus dari keranjang".$this->kembali.$this->awal;
 
 	}
