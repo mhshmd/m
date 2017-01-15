@@ -10,6 +10,7 @@ use App\Http\Controllers\Controller;
 use App\Libraries\KuotaWA\MenuAbstract;
 use App\Libraries\KuotaWA\MenuAwal;
 use App\Libraries\KuotaWA\MenuKuota;
+use App\Libraries\KuotaWA\PreOrder;
 use App\Libraries\KuotaWA\Keranjang;
 use App\Libraries\KuotaWA\WACommand;
 use App\Libraries\KuotaWA\SMSCommand;
@@ -25,6 +26,7 @@ use App\Operator;
 use App\Transaksi;
 use App\Kuota;
 use App\XMPPQuery;
+use App\Kelas;
 
 
 class KuotaController extends Controller
@@ -105,6 +107,18 @@ class KuotaController extends Controller
 
             }
 
+        } elseif(preg_match("/^pj\./i", $wa->getCommand())){
+
+            preg_match_all("/(?<=pj\.)[a-zA-Z1-9\-]{2,5}(?=\.)/i", $wa->getCommand(), $kelas);
+
+            preg_match_all("/(?<=".$kelas[0][0]."\.).+(?=\.\d)/i", $wa->getCommand(), $namaPJ);
+
+            preg_match_all("/(?<=".$namaPJ[0][0]."\.).+/i", $wa->getCommand(), $hp);
+
+            Kelas::where('kelas', $kelas[0][0])->update(['pj'=>$namaPJ[0][0], 'hp'=>$hp[0][0]]);
+
+            return "Alhamdulillah berhasil...\nKelas : ".$kelas[0][0]."\nNama : ".$namaPJ[0][0]."\nHP : ".$hp[0][0];
+
         }
 
         # Inisial Menu
@@ -112,12 +126,16 @@ class KuotaController extends Controller
         $menuAwal = new MenuAwal(0, 'Menu awal');
 
         $kuota = new MenuKuota(1, 'Kuota', $wa->getFrom());
+
+        $preOrder = new PreOrder(2, 'Pre-order (16-18 Jan)', $wa->getFrom());
         
-        $keranjang = new Keranjang(2, 'Keranjang belanja', $wa->getFrom());
+        $keranjang = new Keranjang(3, 'Keranjang belanja', $wa->getFrom());
 
         # Tambah Menu ke Menu Awal
 
         $menuAwal->addSubMenu($kuota);
+
+        $menuAwal->addSubMenu($preOrder);
         
         $menuAwal->addSubMenu($keranjang);
 

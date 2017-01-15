@@ -16,7 +16,9 @@ class SMSCommand extends CommandAbstract{
 
     function getFrom(){
         
-        $this->from = preg_replace("/^(\+62)/", "0",$this->from);
+        // $this->from = preg_replace("/^(\+62)/", "0",$this->from);
+
+        $this->from = preg_replace("/[^a-zA-Z0-9]/", "",$this->from);
         
         return $this->from;
     

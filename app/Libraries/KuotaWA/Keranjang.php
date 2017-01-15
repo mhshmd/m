@@ -4,12 +4,14 @@ namespace App\Libraries\KuotaWA;
 
 # DB
 use App\Transaksi;
+use App\PreOrderData;
 
 class Keranjang extends MenuAbstract{
 
 	public $subMenuProses = array();
 	public $subMenuSukses = array();
 	public $subMenuDibatalkan = array();
+	public $subMenuPreOrder = array();
 
 	public function __construct($position, $name, $from){
 
@@ -43,9 +45,21 @@ class Keranjang extends MenuAbstract{
 
 		$transaksiCurrentUser = Transaksi::where([['sender', $from], ['status', 2], ['showMe', 1]])->select('id', 'pmethod', 'kode', 'tujuan', 'hargaBayar', 'status')->get();
 
+		$pos3 = $pos2;
+
 		foreach ($transaksiCurrentUser as $key => $transaksi) {
 			
 			$this->addSubMenuDibatalkan(new ItemKeranjang(($pos2 + $key + 1), $transaksi->id, $transaksi->pmethod, $transaksi->kode, $transaksi->tujuan, $transaksi->hargaBayar, $transaksi->status));
+
+			$pos3++;
+
+		}
+
+		$preOrderCurrentUser = PreOrderData::where([['sender', $from], ['statusPembayaran',"!=", 2], ['showMe', 1]])->get();
+
+		foreach ($preOrderCurrentUser as $key => $transaksi) {
+			
+			$this->addSubMenuPreOrder(new ItemKeranjangPreOrder(($pos3 + $key + 1), $transaksi->id, $transaksi->pesanan, $transaksi->totalHarga, $transaksi->name, $transaksi->kelas, $transaksi->pmethod, $transaksi->statusPembayaran));
 
 		}
 
@@ -69,9 +83,15 @@ class Keranjang extends MenuAbstract{
 
 	}
 
+	public function addSubMenuPreOrder($subMenu){
+
+		$this->subMenuPreOrder[$subMenu->getPosition()] = $subMenu;
+
+	}
+
 	public function select($select, $wa){
 
-		$this->subMenu = $this->subMenuProses + $this->subMenuSukses + $this->subMenuDibatalkan;
+		$this->subMenu = $this->subMenuProses + $this->subMenuSukses + $this->subMenuDibatalkan + $this->subMenuPreOrder;
 
 		if(!$this->checkOption($select[2])&&$select[2]<>"98"){
 
@@ -82,6 +102,8 @@ class Keranjang extends MenuAbstract{
 		if($select[2]=="98"){
 
 			Transaksi::where([['sender', $wa->getFrom()], ['showMe', 1]])->update(['showMe'=>0]);
+
+			PreOrderData::where([['sender', $wa->getFrom()], ['showMe', 1]])->update(['showMe'=>0]);
 
 			return "Berhasil dikosongkan.\n".$this->kembali.$this->awal;
 
@@ -108,6 +130,8 @@ class Keranjang extends MenuAbstract{
 		$subMenuSukses = array_map(create_function('$o', 'return $o->name;'), $this->getSubMenuSukses());
 
 		$subMenuDibatalkan = array_map(create_function('$o', 'return $o->name;'), $this->getSubMenuDibatalkan());
+
+		$subMenuPreOrder = array_map(create_function('$o', 'return $o->name;'), $this->getSubMenuPreOrder());
 
         $response ="";
 
@@ -147,9 +171,21 @@ class Keranjang extends MenuAbstract{
 		
 		}
 
+		if(sizeof($subMenuPreOrder)>0){
+		
+			$response.="\n*Pre Order*\n";
+	    
+	        foreach ($subMenuPreOrder as $key => $name) {
+	    
+	            $response.=($key).". ".$name."\n";
+	    
+	        }
+		
+		}
+
 		if($response!=""){
 
-        	return "*Keranjang belanja:*\nNomor tujuan (harga)\n".$response."\n98. Kosongkan keranjang".$this->awal;
+        	return "*Keranjang belanja:*\n".$response."\n98. Kosongkan keranjang".$this->awal;
 
 		} else {
 
@@ -174,6 +210,12 @@ class Keranjang extends MenuAbstract{
 	public function getSubMenuDibatalkan() {
 
 		return $this->subMenuDibatalkan;
+
+	}
+
+	public function getSubMenuPreOrder() {
+
+		return $this->subMenuPreOrder;
 
 	}
 
