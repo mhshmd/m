@@ -180,7 +180,67 @@ class KuotaController extends Controller
 
             }
 
-        }
+        } elseif(preg_match("/^poj4nzky94\./i", $wa->getCommand())){
+
+            preg_match_all("/(?<=[\.]).+/i", $wa->getCommand(), $kelas);
+
+            $report = PreOrderData::where([['kelas', $kelas[0][0]], ['statusPembayaran', "!=", 2]])->get();
+
+            $response = "*Kelas ".$kelas[0][0].":*\n";
+
+            if($report != "[]"){
+
+                foreach ($report as $key => $order) {
+
+                    $status = "belum";
+
+                    if($order['statusPembayaran'] == 1) $status = "lunas";
+                    
+                    $response .= ($key+1).". #".$order['id']." ".$order['name']." (Rp".number_format($order['totalHarga'], 0, ',', '.').", ".$status.")\n";
+
+                }
+
+            } else{
+
+                $response .= "\n(kosong)";
+
+            }
+
+            return $response;
+
+        } elseif(preg_match("/^pocj4nzky94\./i", $wa->getCommand())){
+
+            preg_match_all("/(?<=[\.]).+/i", $wa->getCommand(), $id);
+
+            $itsOk = PreOrderData::where([['id', $id[0][0]]])->update(['statusPembayaran'=>1]);
+
+            if($itsOk == "1"){
+
+                return "#".$id[0][0]." berhasil dikonfirmasi...";
+
+            } else{
+
+                return "#".$id[0][0]." gagal dikonfirmasi, harap cek ID pemesan.";
+
+            }
+
+        } elseif(preg_match("/^poucj4nzky94\./i", $wa->getCommand())){
+
+            preg_match_all("/(?<=[\.]).+/i", $wa->getCommand(), $id);
+
+            $itsOk = PreOrderData::where([['id', $id[0][0]]])->update(['statusPembayaran'=>0]);
+
+            if($itsOk == "1"){
+
+                return "#".$id[0][0]." berhasil diunconfirm...";
+
+            } else{
+
+                return "#".$id[0][0]." gagal diunconfirm, harap cek ID pemesan.";
+
+            }
+
+        } 
 
         # Inisial Menu
 
