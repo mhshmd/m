@@ -51,7 +51,7 @@ class KelasPreOrder extends MenuAbstract{
 
 			preg_match_all("/(?<=\.)?\w{1,20}(?=\.)?/", $select[5], $pesanan);
 
-			$response = "*Pesanan :*\n";
+			$response = "*Pesanan:*\n";
 
 			$totalHarga = 0;
 
