@@ -26,6 +26,16 @@ class PreOrder extends MenuAbstract{
 
 		if(count($select)==3){
 
+			if($select[2] == 8){
+
+				array_pop($select);
+
+		    	UserQuery::where([['sender', $wa->getFrom()],['saved',0]])->update(['commandArray'=>serialize($select)]);
+
+				return "Mohon masukkan nama Kamu lagi.";
+
+			}
+
 			return "*Tingkat:*\n1. I\n2. II\n3. III\n4. IV\n\n99. Ubah nama".$this->awal;
 
 		} elseif(count($select)==4){
