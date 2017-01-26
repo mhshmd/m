@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Kami akan kembali.</title>
+        <title>Selamat tinggal.</title>
 
         <link href="https://fonts.googleapis.com/css?family=Lato:100" rel="stylesheet" type="text/css">
 
@@ -40,7 +40,7 @@
     <body>
         <div class="container">
             <div class="content">
-                <div class="title">Kami akan kembali.</div>
+                <div class="title">Web ini tidak beroperasi lagi.</div>
             </div>
         </div>
     </body>

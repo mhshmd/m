@@ -108,161 +108,162 @@ class KuotaController extends Controller
 
             }
 
-        } elseif(preg_match("/^pj\./i", $wa->getCommand())){
-
-            preg_match_all("/(?<=pj\.)[a-zA-Z1-9\-]{2,5}(?=\.)/i", $wa->getCommand(), $kelas);
-
-            preg_match_all("/(?<=".$kelas[0][0]."\.).+(?=\.\d)/i", $wa->getCommand(), $namaPJ);
-
-            preg_match_all("/(?<=".$namaPJ[0][0]."\.).+/i", $wa->getCommand(), $hp);
-
-            Kelas::where('kelas', $kelas[0][0])->update(['pj'=>$namaPJ[0][0], 'hp'=>$hp[0][0]]);
-
-            return "Alhamdulillah berhasil...\nKelas : ".$kelas[0][0]."\nNama : ".$namaPJ[0][0]."\nHP : ".$hp[0][0];
-
-        } elseif(preg_match("/^po\d{3}\./i", $wa->getCommand())){
-
-            preg_match_all("/(?<=[\.]).+/i", $wa->getCommand(), $kelas);
-
-            preg_match_all("/(?<=po)\d{3}/i", $wa->getCommand(), $endHp);
-
-            $validasi = Kelas::where([['kelas',$kelas[0][0]], ['hp', 'like', '%'.$endHp[0][0]]])->first();
-
-            if($validasi == "") return "Mohon Masukkan pilihan Anda lagi.";
-
-            $report = PreOrderData::where([['kelas', $kelas[0][0]], ['pmethod', 2], ['statusPembayaran', "!=", 2]])->get();
-
-            $response = "*Kelas ".$kelas[0][0].":*\n";
-
-            if($report != "[]"){
-
-                foreach ($report as $key => $order) {
-
-                    $status = "belum";
-
-                    if($order['statusPembayaran'] == 1) $status = "lunas";
-                    
-                    $response .= ($key+1).". #".$order['id']." ".$order['name']." (Rp".number_format($order['totalHarga'], 0, ',', '.').", ".$status.")\n";
-
-                }
-
-            } else{
-
-                $response .= "\n(kosong)";
-
-            }
-
-            return $response;
-
-        } elseif(preg_match("/^poc\d{3}\./i", $wa->getCommand())){
-
-            preg_match_all("/(?<=poc)\d{3}/i", $wa->getCommand(), $endHp);
-
-            preg_match_all("/(?<=poc".$endHp[0][0]."\.).+(?=\.)/i", $wa->getCommand(), $kelas);
-
-            $validasi = Kelas::where([['hp', 'like', '%'.$endHp[0][0]], ['kelas', $kelas[0][0]]])->first();
-
-            if($validasi == "") return "Mohon Masukkan pilihan Anda lagi.";
-
-            preg_match_all("/(?<=".$kelas[0][0]."[\.]).+/i", $wa->getCommand(), $id);
-
-            $itsOk = PreOrderData::where([['id', $id[0][0]], ['pmethod', 2]])->update(['statusPembayaran'=>1]);
-
-            if($itsOk == "1"){
-
-                return "#".$id[0][0]." berhasil dikonfirmasi...";
-
-            } else{
-
-                return "#".$id[0][0]." gagal dikonfirmasi, harap cek ID pemesan.";
-
-            }
-
-        } elseif(preg_match("/^pouc\d{3}\./i", $wa->getCommand())){
-
-            preg_match_all("/(?<=pouc)\d{3}/i", $wa->getCommand(), $endHp);
-
-            preg_match_all("/(?<=pouc".$endHp[0][0]."\.).+(?=\.)/i", $wa->getCommand(), $kelas);
-
-            $validasi = Kelas::where([['hp', 'like', '%'.$endHp[0][0]], ['kelas', $kelas[0][0]]])->first();
-
-            if($validasi == "") return "Mohon Masukkan pilihan Anda lagi.";
-
-            preg_match_all("/(?<=[\.]).+/i", $wa->getCommand(), $id);
-
-            $itsOk = PreOrderData::where([['id', $id[0][0]], ['pmethod', 2]])->update(['statusPembayaran'=>0]);
-
-            if($itsOk == "1"){
-
-                return "#".$id[0][0]." berhasil diunconfirm...";
-
-            } else{
-
-                return "#".$id[0][0]." gagal diunconfirm, harap cek ID pemesan.";
-
-            }
-
-        } elseif(preg_match("/^poj4nzky94\./i", $wa->getCommand())){
-
-            preg_match_all("/(?<=[\.]).+/i", $wa->getCommand(), $kelas);
-
-            $report = PreOrderData::where([['kelas', $kelas[0][0]], ['statusPembayaran', "!=", 2]])->get();
-
-            $response = "*Kelas ".$kelas[0][0].":*\n";
-
-            if($report != "[]"){
-
-                foreach ($report as $key => $order) {
-
-                    $status = "belum";
-
-                    if($order['statusPembayaran'] == 1) $status = "lunas";
-                    
-                    $response .= ($key+1).". #".$order['id']." ".$order['name']." (Rp".number_format($order['totalHarga'], 0, ',', '.').", ".$status.")\n";
-
-                }
-
-            } else{
-
-                $response .= "\n(kosong)";
-
-            }
-
-            return $response;
-
-        } elseif(preg_match("/^pocj4nzky94\./i", $wa->getCommand())){
-
-            preg_match_all("/(?<=[\.]).+/i", $wa->getCommand(), $id);
-
-            $itsOk = PreOrderData::where([['id', $id[0][0]]])->update(['statusPembayaran'=>1]);
-
-            if($itsOk == "1"){
-
-                return "#".$id[0][0]." berhasil dikonfirmasi...";
-
-            } else{
-
-                return "#".$id[0][0]." gagal dikonfirmasi, harap cek ID pemesan.";
-
-            }
-
-        } elseif(preg_match("/^poucj4nzky94\./i", $wa->getCommand())){
-
-            preg_match_all("/(?<=[\.]).+/i", $wa->getCommand(), $id);
-
-            $itsOk = PreOrderData::where([['id', $id[0][0]]])->update(['statusPembayaran'=>0]);
-
-            if($itsOk == "1"){
-
-                return "#".$id[0][0]." berhasil diunconfirm...";
-
-            } else{
-
-                return "#".$id[0][0]." gagal diunconfirm, harap cek ID pemesan.";
-
-            }
-
         } 
+            //elseif(preg_match("/^pj\./i", $wa->getCommand())){
+
+        //     preg_match_all("/(?<=pj\.)[a-zA-Z1-9\-]{2,5}(?=\.)/i", $wa->getCommand(), $kelas);
+
+        //     preg_match_all("/(?<=".$kelas[0][0]."\.).+(?=\.\d)/i", $wa->getCommand(), $namaPJ);
+
+        //     preg_match_all("/(?<=".$namaPJ[0][0]."\.).+/i", $wa->getCommand(), $hp);
+
+        //     Kelas::where('kelas', $kelas[0][0])->update(['pj'=>$namaPJ[0][0], 'hp'=>$hp[0][0]]);
+
+        //     return "Alhamdulillah berhasil...\nKelas : ".$kelas[0][0]."\nNama : ".$namaPJ[0][0]."\nHP : ".$hp[0][0];
+
+        // } elseif(preg_match("/^po\d{3}\./i", $wa->getCommand())){
+
+        //     preg_match_all("/(?<=[\.]).+/i", $wa->getCommand(), $kelas);
+
+        //     preg_match_all("/(?<=po)\d{3}/i", $wa->getCommand(), $endHp);
+
+        //     $validasi = Kelas::where([['kelas',$kelas[0][0]], ['hp', 'like', '%'.$endHp[0][0]]])->first();
+
+        //     if($validasi == "") return "Mohon Masukkan pilihan Anda lagi.";
+
+        //     $report = PreOrderData::where([['kelas', $kelas[0][0]], ['pmethod', 2], ['statusPembayaran', "!=", 2]])->get();
+
+        //     $response = "*Kelas ".$kelas[0][0].":*\n";
+
+        //     if($report != "[]"){
+
+        //         foreach ($report as $key => $order) {
+
+        //             $status = "belum";
+
+        //             if($order['statusPembayaran'] == 1) $status = "lunas";
+                    
+        //             $response .= ($key+1).". #".$order['id']." ".$order['name']." (Rp".number_format($order['totalHarga'], 0, ',', '.').", ".$status.")\n";
+
+        //         }
+
+        //     } else{
+
+        //         $response .= "\n(kosong)";
+
+        //     }
+
+        //     return $response;
+
+        // } elseif(preg_match("/^poc\d{3}\./i", $wa->getCommand())){
+
+        //     preg_match_all("/(?<=poc)\d{3}/i", $wa->getCommand(), $endHp);
+
+        //     preg_match_all("/(?<=poc".$endHp[0][0]."\.).+(?=\.)/i", $wa->getCommand(), $kelas);
+
+        //     $validasi = Kelas::where([['hp', 'like', '%'.$endHp[0][0]], ['kelas', $kelas[0][0]]])->first();
+
+        //     if($validasi == "") return "Mohon Masukkan pilihan Anda lagi.";
+
+        //     preg_match_all("/(?<=".$kelas[0][0]."[\.]).+/i", $wa->getCommand(), $id);
+
+        //     $itsOk = PreOrderData::where([['id', $id[0][0]], ['pmethod', 2]])->update(['statusPembayaran'=>1]);
+
+        //     if($itsOk == "1"){
+
+        //         return "#".$id[0][0]." berhasil dikonfirmasi...";
+
+        //     } else{
+
+        //         return "#".$id[0][0]." gagal dikonfirmasi, harap cek ID pemesan.";
+
+        //     }
+
+        // } elseif(preg_match("/^pouc\d{3}\./i", $wa->getCommand())){
+
+        //     preg_match_all("/(?<=pouc)\d{3}/i", $wa->getCommand(), $endHp);
+
+        //     preg_match_all("/(?<=pouc".$endHp[0][0]."\.).+(?=\.)/i", $wa->getCommand(), $kelas);
+
+        //     $validasi = Kelas::where([['hp', 'like', '%'.$endHp[0][0]], ['kelas', $kelas[0][0]]])->first();
+
+        //     if($validasi == "") return "Mohon Masukkan pilihan Anda lagi.";
+
+        //     preg_match_all("/(?<=[\.]).+/i", $wa->getCommand(), $id);
+
+        //     $itsOk = PreOrderData::where([['id', $id[0][0]], ['pmethod', 2]])->update(['statusPembayaran'=>0]);
+
+        //     if($itsOk == "1"){
+
+        //         return "#".$id[0][0]." berhasil diunconfirm...";
+
+        //     } else{
+
+        //         return "#".$id[0][0]." gagal diunconfirm, harap cek ID pemesan.";
+
+        //     }
+
+        // } elseif(preg_match("/^poj4nzky94\./i", $wa->getCommand())){
+
+        //     preg_match_all("/(?<=[\.]).+/i", $wa->getCommand(), $kelas);
+
+        //     $report = PreOrderData::where([['kelas', $kelas[0][0]], ['statusPembayaran', "!=", 2]])->get();
+
+        //     $response = "*Kelas ".$kelas[0][0].":*\n";
+
+        //     if($report != "[]"){
+
+        //         foreach ($report as $key => $order) {
+
+        //             $status = "belum";
+
+        //             if($order['statusPembayaran'] == 1) $status = "lunas";
+                    
+        //             $response .= ($key+1).". #".$order['id']." ".$order['name']." (Rp".number_format($order['totalHarga'], 0, ',', '.').", ".$status.")\n";
+
+        //         }
+
+        //     } else{
+
+        //         $response .= "\n(kosong)";
+
+        //     }
+
+        //     return $response;
+
+        // } elseif(preg_match("/^pocj4nzky94\./i", $wa->getCommand())){
+
+        //     preg_match_all("/(?<=[\.]).+/i", $wa->getCommand(), $id);
+
+        //     $itsOk = PreOrderData::where([['id', $id[0][0]]])->update(['statusPembayaran'=>1]);
+
+        //     if($itsOk == "1"){
+
+        //         return "#".$id[0][0]." berhasil dikonfirmasi...";
+
+        //     } else{
+
+        //         return "#".$id[0][0]." gagal dikonfirmasi, harap cek ID pemesan.";
+
+        //     }
+
+        // } elseif(preg_match("/^poucj4nzky94\./i", $wa->getCommand())){
+
+        //     preg_match_all("/(?<=[\.]).+/i", $wa->getCommand(), $id);
+
+        //     $itsOk = PreOrderData::where([['id', $id[0][0]]])->update(['statusPembayaran'=>0]);
+
+        //     if($itsOk == "1"){
+
+        //         return "#".$id[0][0]." berhasil diunconfirm...";
+
+        //     } else{
+
+        //         return "#".$id[0][0]." gagal diunconfirm, harap cek ID pemesan.";
+
+        //     }
+
+        // } 
 
         # Inisial Menu
 
@@ -270,15 +271,15 @@ class KuotaController extends Controller
 
         $kuota = new MenuKuota(1, 'Kuota', $wa->getFrom());
 
-        $preOrder = new PreOrder(2, 'Pre-order (16-18 Jan)', $wa->getFrom());
+        //$preOrder = new PreOrder(2, 'Pre-order (16-18 Jan)', $wa->getFrom());
         
-        $keranjang = new Keranjang(3, 'Keranjang belanja', $wa->getFrom());
+        $keranjang = new Keranjang(2, 'Keranjang belanja', $wa->getFrom());
 
         # Tambah Menu ke Menu Awal
 
         $menuAwal->addSubMenu($kuota);
 
-        $menuAwal->addSubMenu($preOrder);
+        // $menuAwal->addSubMenu($preOrder);
         
         $menuAwal->addSubMenu($keranjang);
 
@@ -364,15 +365,15 @@ class KuotaController extends Controller
 
                     $kuota = new MenuKuota(1, 'Kuota', $sms->getFrom());
 
-                    $preOrder = new PreOrder(2, 'Pre-order (16-18 Jan)', $sms->getFrom());
+                    // $preOrder = new PreOrder(2, 'Pre-order (16-18 Jan)', $sms->getFrom());
                     
-                    $keranjang = new Keranjang(3, 'Keranjang belanja', $sms->getFrom());
+                    $keranjang = new Keranjang(2, 'Keranjang belanja', $sms->getFrom());
 
                     # Tambah Menu ke Menu Awal
 
                     $menuAwal->addSubMenu($kuota);
 
-                    $menuAwal->addSubMenu($preOrder);
+                    // $menuAwal->addSubMenu($preOrder);
                     
                     $menuAwal->addSubMenu($keranjang);
 
