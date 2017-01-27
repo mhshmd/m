@@ -20,7 +20,7 @@ class HomeController extends Controller
      */
     public function index(Request $request)
     {
-        return view('errors.503');
+        // return view('errors.503');
 
         //CEK USER AKTIF
         $email = $request->cookie('email');
