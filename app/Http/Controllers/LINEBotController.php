@@ -23,7 +23,7 @@ class LINEBotController extends Controller
 
     	//$body = $request->all();
 
-    	$body = file_get_contents('php://input')
+    	$body = file_get_contents('php://input');
 
     	$signature = $_SERVER['HTTP_X_LINE_SIGNATURE'];
 
