@@ -15,6 +15,8 @@ use Illuminate\Http\Response;
 
 //Route::get('/replacePng', 'QuestController@replacePng');
 
+Route::post('/bot', 'LINEBotController@bot')->name('bot');
+
 Route::get('/', 'HomeController@index')->name('home');
 Route::get('/monitor', 'HomeController@monitor');
 Route::get('/test', function () {
