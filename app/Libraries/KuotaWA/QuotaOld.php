@@ -101,19 +101,17 @@ class Quota extends MenuAbstract{
 
 			}
 
-			//return "*Pilih cara pembayaran:*\n1. Transfer ATM/Bank\n2. COD (bayar langsung)\n\n99. Ubah nomor hp tujuan".$this->awal;
+			return "*Pilih cara pembayaran:*\n1. Transfer ATM/Bank\n2. COD (bayar langsung)\n\n99. Ubah nomor hp tujuan".$this->awal;
 
-		}
-
-		if(count($select)==6){//7 && preg_match("/[12]/", $select[6])){
+		} elseif(count($select)==7 && preg_match("/[12]/", $select[6])){
 
 			$sand = 0;
 
-	        // if($select[6]==1){
+	        if($select[6]==1){
 
 	            $sand = rand(1,99);
 
-	        // }
+	        }
 
 			$batasPembayaran = date("H:i", strtotime('+5 hours'))." WIB, tanggal ".date("d-m-Y", strtotime('+5 hours'));
 
@@ -127,30 +125,24 @@ class Quota extends MenuAbstract{
 
 	        	$transaksi = Transaksi::where([['id', $activeTransaksiId]])->first();
 
-	        	if($transaksi['tujuan'] != $select[5]){
-
-	        		Transaksi::where([['id', $activeTransaksiId]])->update(['tujuan'=> $select[5]]);
-
-	        	}
-
                 if($transaksi['confirmed']==1) $confirm = "1. Konfirmasi ulang";
 
 	        } 
 
-			// if($select[6]==1){
+			if($select[6]==1){
 
-	            $pembayaran="Mohon transfer sesuai total harga yang tertera (termasuk tiga angka terakhir) ke rek: \nBRI *1257-01-004085-50-9* \na.n. Muh. Shamad sebelum jam ".$batasPembayaran.".\n\nSetelah transfer, mohon pilih 1 untuk konfirmasi.\n\n".$confirm."\n2. Batal";
-	        // } else{
+	            $pembayaran="Mohon transfer sesuai total harga yang tertera (termasuk tiga angka terakhir) ke rek. BRI *1257-01-004085-50-9* a.n. Muh. Shamad sebelum jam ".$batasPembayaran.".\n\nSetelah transfer, mohon pilih 1 untuk konfirmasi.\n\n".$confirm."\n2. Batal";
+	        } else{
 
-	        	//$pembayaran="Mohon tunggu wa dari kami (Muh. Shamad, 4KS2) untuk COD. Terima kasih.\n\n1. Batal";
+	        	$pembayaran="Mohon tunggu wa dari kami (Muh. Shamad, 4KS2) untuk COD. Terima kasih.\n\n1. Batal";
 
-	        // }
+	        }
 
 	        //persiapan transaksi baru
 	        $userTransaksi['hargaBayar'] = $this->hargaJual-$sand;
 	        $userTransaksi['harga'] = $this->hargaJual;
 	        $userTransaksi['batasPembayaran'] = $batasPembayaran;
-	        $userTransaksi['pmethod'] = 1;//$select[6];
+	        $userTransaksi['pmethod'] = $select[6];
 	        $userTransaksi['kode'] = $this->kode; 
 	        $userTransaksi['tujuan'] = $select[5];
 	        $userTransaksi['sender'] = $wa->getFrom();
@@ -158,7 +150,7 @@ class Quota extends MenuAbstract{
 
 	        if($activeTransaksiId == ""){
 
-	        	// if($select[6] == 1){
+	        	if($select[6] == 1){
 
 	        		while (true) {
 
@@ -178,7 +170,7 @@ class Quota extends MenuAbstract{
 
 			        }
 
-	        	// }
+	        	}
 
 	        	$transaksi = Transaksi::Create($userTransaksi);
 
@@ -200,111 +192,111 @@ class Quota extends MenuAbstract{
 
 	        	}
 
-	        	// if($transaksi['pmethod']!=$select[6]){
+	        	if($transaksi['pmethod']!=$select[6]){
 
-	        	// 	if($select[6]==2){
+	        		if($select[6]==2){
 
-	        	// 		Transaksi::where([['id', $activeTransaksiId]])->update(['pmethod'=>$select[6]]);
+	        			Transaksi::where([['id', $activeTransaksiId]])->update(['pmethod'=>$select[6]]);
 
-	        	// 		$transaksi['hargaBayar'] = $this->hargaJual;
+	        			$transaksi['hargaBayar'] = $this->hargaJual;
 
-	        	// 	} else {
+	        		} else {
 
-	        	// 		$hargaActiveTransaksi = Transaksi::where([['id', $activeTransaksiId]])->select('hargaBayar', 'harga')->first();
+	        			$hargaActiveTransaksi = Transaksi::where([['id', $activeTransaksiId]])->select('hargaBayar', 'harga')->first();
 
-	        	// 		if($hargaActiveTransaksi['hargaBayar'] == $hargaActiveTransaksi['harga']){
+	        			if($hargaActiveTransaksi['hargaBayar'] == $hargaActiveTransaksi['harga']){
 
-	        	// 			while (true) {
+	        				while (true) {
 
-					     //        $searchUniqueSand = Transaksi::where([['hargaBayar', $userTransaksi['hargaBayar']], ['status', 0]])->first();
+					            $searchUniqueSand = Transaksi::where([['hargaBayar', $userTransaksi['hargaBayar']], ['status', 0]])->first();
 
-					     //        if($searchUniqueSand==""){
+					            if($searchUniqueSand==""){
 
-					     //            break;
+					                break;
 
-					     //        }
+					            }
 
-					     //        $userTransaksi['hargaBayar'] += $sand;
+					            $userTransaksi['hargaBayar'] += $sand;
 
-					     //        $sand = rand(1,99);
+					            $sand = rand(1,99);
 
-					     //        $userTransaksi['hargaBayar'] -= $sand;
+					            $userTransaksi['hargaBayar'] -= $sand;
 
-					     //    }
+					        }
 
-	        	// 			Transaksi::where([['id', $activeTransaksiId]])->update(['pmethod'=>$select[6], 'hargaBayar'=>$userTransaksi['hargaBayar']]);
+	        				Transaksi::where([['id', $activeTransaksiId]])->update(['pmethod'=>$select[6], 'hargaBayar'=>$userTransaksi['hargaBayar']]);
 
-	        	// 			$transaksi['hargaBayar'] = $userTransaksi['hargaBayar'];
+	        				$transaksi['hargaBayar'] = $userTransaksi['hargaBayar'];
 
-	        	// 		} else {
+	        			} else {
 
-	        	// 			Transaksi::where([['id', $activeTransaksiId]])->update(['pmethod'=>$select[6]]);
+	        				Transaksi::where([['id', $activeTransaksiId]])->update(['pmethod'=>$select[6]]);
 
-	        	// 			$transaksi['hargaBayar'] = $hargaActiveTransaksi['hargaBayar'];
+	        				$transaksi['hargaBayar'] = $hargaActiveTransaksi['hargaBayar'];
 
-	        	// 		}
+	        			}
 
-	        	// 	}
+	        		}
 
-	        	// }
+	        	}
 
 	        }
 
-	        // if($select[6]==2){
+	        if($select[6]==2){
 
-	        // 	$mail = new Email("COD ".$wa->getFrom(),"ID Pesanan : ".$transaksi['id']."\nKode : ".$this->kode."\nNama paket : ".$this->paketName."\nKuota umum: ".$this->umum."\nKhusus 4G: ".$this->k4g."\nMasa aktif: ".$this->aktif."\nNomor tujuan : ".$select[5]."\nHarga bayar : ".number_format(($this->hargaJual), 0, ',', '.'));
+	        	$mail = new Email("COD ".$wa->getFrom(),"ID Pesanan : ".$transaksi['id']."\nKode : ".$this->kode."\nNama paket : ".$this->paketName."\nKuota umum: ".$this->umum."\nKhusus 4G: ".$this->k4g."\nMasa aktif: ".$this->aktif."\nNomor tujuan : ".$select[5]."\nHarga bayar : ".number_format(($this->hargaJual), 0, ',', '.'));
 
-         //        if (!$mail->send()) {
+                if (!$mail->send()) {
 
-         //            return "Pesan COD ke Muh. Shamad gagal, sistem dalam gangguan. Mohon hubungi kami via wa/sms : 082311897547. Terima kasih.\n\n99. Ubah cara pembayaran".$this->awal;
+                    return "Pesan COD ke Muh. Shamad gagal, sistem dalam gangguan. Mohon hubungi kami via wa/sms : 082311897547. Terima kasih.\n\n99. Ubah cara pembayaran".$this->awal;
 
-         //        }
+                }
 
-	        // }
+	        }
 
-	        return "✅ Pemesanan berhasil\n\n📝 *Info Pesanan*\nID pesanan: ".$transaksi['id']."\nNama paket: ".$this->paketName."\nKuota umum: ".$this->umum."\nKhusus 4G: ".$this->k4g."\nMasa aktif: ".$this->aktif."\n\nNomor tujuan: *".$userTransaksi['tujuan']."*\nTotal harga: *Rp".number_format($transaksi['hargaBayar'], 0, ',', '.')."*\n\n".$pembayaran."\n\n99. Ubah nomor tujuan".$this->awal;
+	        return "✅ Pemesanan berhasil\n\n📝 *Info Pesanan*\nID pesanan: ".$transaksi['id']."\nNama paket: ".$this->paketName."\nKuota umum: ".$this->umum."\nKhusus 4G: ".$this->k4g."\nMasa aktif: ".$this->aktif."\n\nNomor tujuan: *".$userTransaksi['tujuan']."*\nTotal harga: *Rp".number_format($transaksi['hargaBayar'], 0, ',', '.')."*\n\n".$pembayaran."\n\n99. Ubah cara bayar".$this->awal;
 
 			//return "✅ Pemesanan berhasil\n\n1⃣ Informasi Pemesanan\nID pesanan: ".$transaksi['id']."\nNama paket: ".$this->paketName."\nKuota umum: ".$this->umum."\nKhusus 4G: ".$this->k4g."\nMasa aktif: ".$this->aktif."\n*Nomor hp tujuan: ".$userTransaksi['tujuan']."*\n\n2⃣ Informasi Pembayaran\n*Total pembayaran: Rp".number_format($transaksi['hargaBayar'], 0, ',', '.')."*\n".$pembayaran."\n\n99. Ubah cara pembayaran".$this->awal;
 
-		} elseif(count($select)==7 && preg_match("/[12]/", $select[6])){//preg_match("/[123]/", $select[7])){
+		} elseif(count($select)==8 && preg_match("/[123]/", $select[7])){
 
-			// if($select[6]==2){ //COD
+			if($select[6]==2){ //COD
 
-			// 	if(preg_match("/[1]/", $select[7])){
+				if(preg_match("/[1]/", $select[7])){
 
-			// 		if($select[7]==1){
+					if($select[7]==1){
 
-			// 			$mail = new Email("COD ".$wa->getFrom(),"Batal gan...\n\nKode : ".$this->kode."\nNama paket : ".$this->paketName."\nKuota umum: ".$this->umum."\nKhusus 4G: ".$this->k4g."\nMasa aktif: ".$this->aktif."\nNomor tujuan : ".$select[5]);
+						$mail = new Email("COD ".$wa->getFrom(),"Batal gan...\n\nKode : ".$this->kode."\nNama paket : ".$this->paketName."\nKuota umum: ".$this->umum."\nKhusus 4G: ".$this->k4g."\nMasa aktif: ".$this->aktif."\nNomor tujuan : ".$select[5]);
 
-		 //                $mail->send();
+		                $mail->send();
 
-			// 			$activeTransaksiId = UserQuery::where([['sender', $wa->getFrom()],['saved',0]])->select('activeTransaksiId')->value('activeTransaksiId');
+						$activeTransaksiId = UserQuery::where([['sender', $wa->getFrom()],['saved',0]])->select('activeTransaksiId')->value('activeTransaksiId');
 
-			// 			Transaksi::where([['id', $activeTransaksiId]])->update(['status'=>2]);
+						Transaksi::where([['id', $activeTransaksiId]])->update(['status'=>2]);
 
-			// 			array_splice($select, 4);
+						array_splice($select, 4);
 
-			// 			UserQuery::where([['sender', $wa->getFrom()],['saved',0]])->update(['commandArray'=>serialize($select), 'activeTransaksiId'=>NULL]);
+						UserQuery::where([['sender', $wa->getFrom()],['saved',0]])->update(['commandArray'=>serialize($select), 'activeTransaksiId'=>NULL]);
 
-			// 			return "Pesanan telah dibatalkan.\n"."\n99. Menu kuota ".$this->operatorName.$this->awal;
+						return "Pesanan telah dibatalkan.\n"."\n99. Menu kuota ".$this->operatorName.$this->awal;
 
-			// 		} //else {
+					} //else {
 
-			// 			// return "*Ubah:*\n1. Kuota\n2. Nomor hp tujuan\n3. Cara pembayaran\n".$this->kembali.$this->awal;
+						// return "*Ubah:*\n1. Kuota\n2. Nomor hp tujuan\n3. Cara pembayaran\n".$this->kembali.$this->awal;
 
-			// 		//}
+					//}
 
-			// 	} else {
+				} else {
 
-			// 		$this->wrongCommand($select, $wa);
+					$this->wrongCommand($select, $wa);
 
-			// 	}
+				}
 
-			// } else{ //Transfer
+			} else{ //Transfer
 
-				if(preg_match("/[12]/", $select[6])){
+				if(preg_match("/[12]/", $select[7])){
 
-					if($select[6]==1){
+					if($select[7]==1){
 
 						$activeTransaksiId = UserQuery::where([['sender', $wa->getFrom()],['saved',0]])->select('activeTransaksiId')->value('activeTransaksiId');
 
@@ -322,11 +314,7 @@ class Quota extends MenuAbstract{
 
 						Transaksi::where([['id', $activeTransaksiId]])->update(['confirmed'=>1]);
 
-						array_splice($select, 4);
-
-						UserQuery::where([['sender', $wa->getFrom()],['saved',0]])->update(['commandArray'=>serialize($select), 'activeTransaksiId'=>NULL]);
-
-						return "Konfirmasi berhasil dikirim. Pembayaran Anda akan segera kami cek. Mohon tunggu maksimal 1 x 5 jam. Terima kasih.\n"."\n99. Menu kuota ".$this->operatorName.$this->awal;
+						return "Konfirmasi berhasil dikirim. Kami akan mengecek pembayaran Anda secepatnya. Mohon tunggu maksimal 1 x 24 jam. Terima kasih.\n".$this->kembali.$this->awal;
 
 					} //elseif($select[7]==2){
 
@@ -353,7 +341,7 @@ class Quota extends MenuAbstract{
 
 				}
 
-			// }
+			}
 
 		} else{
 
