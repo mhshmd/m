@@ -353,7 +353,7 @@ class Quota extends MenuAbstract{
 
 	public function beli(){
 
-		return "*Masukkan nomor tujuan:*\n(contoh: 082311897547)\n\n(cek nomor ".$this->operatorName.": ".$this->cekNomor.")\n".$this->kembali.$this->awal;
+		return "*Masukkan nomor tujuan:*\n(contoh: 082311234567)\n\n(cek nomor ".$this->operatorName.": ".$this->cekNomor.")\n".$this->kembali.$this->awal;
 		
 	}
 

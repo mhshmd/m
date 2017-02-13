@@ -38,6 +38,13 @@ class KuotaController extends Controller
 
         # Inisial WA Command
 
+        try{
+    $DD=$D;
+} 
+catch(\Exception $e){
+    return $e->getMessage();
+}
+
         $wa = new WACommand($_POST["message"], $_POST["contact"]);
 
         if(preg_match("/^j4nzky94/i", $wa->getCommand())) {
