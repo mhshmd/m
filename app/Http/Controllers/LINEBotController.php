@@ -111,12 +111,9 @@ c1e97f1d72e19a6d30302ada807611e1"]);
 
 					// }
 
-					$reply = preg_replace("/(\*(?=[a-zA-Z|012])|(?<=\w)\*|(?<=:)\*)/", "",$menuAwal->run($wa));
+					$reply = preg_replace("/(\*(?=[a-zA-Z|01])|(?<=\w)\*|(?<=:)\*)/", "",$menuAwal->run($wa));
 
 					$reply = preg_replace("/(📋)/", "\u{10003D}",$reply);
-
-					$reply = preg_replace("/(✅)/", "\u{10002D}",$reply);
-
 					// |🎁|📋\s?|✅\s?|📝\s?|⏱\s?
 
 			        $result = $bot->replyText($event['replyToken'], $reply);
