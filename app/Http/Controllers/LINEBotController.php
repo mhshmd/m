@@ -136,7 +136,9 @@ c1e97f1d72e19a6d30302ada807611e1"]);
 
 		$bot = new LINEBot($httpClient, ['channelSecret' => 'c1e97f1d72e19a6d30302ada807611e1']);
 
-		$textMessageBuilder = new TextMessageBuilder('hello');
+		$messagge = "\u{100075}Promo hari ini: Indosat 2GB + 5GB 4G hanya 30.000\n\n1. Beli\n\n0. Menu awal"
+
+		$textMessageBuilder = new TextMessageBuilder($messagge);
 
 		$response = $bot->pushMessage('U8b44000759f9acd2ce3e7cdb2d1b8b50', $textMessageBuilder);
 
