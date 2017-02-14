@@ -55,6 +55,8 @@ class MenuAwal extends MenuAbstract{
         
         }
 
+        $response = preg_replace("/\n$/", "",$response);
+
         return "*Menu:*\n".$response;
 
 	}

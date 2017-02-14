@@ -116,7 +116,7 @@ class ItemKeranjang extends MenuAbstract{
 
 						Transaksi::where([['id', $this->id]])->update(['confirmed'=>1]);
 
-						return "Konfirmasi berhasil dikirim. Kami akan mengecek pembayaran Anda secepatnya. Mohon tunggu maksimal 1 x 24 jam. Terima kasih.\n".$this->kembali.$this->awal;
+						return "Konfirmasi berhasil dikirim. Pembayaran Anda akan segera kami cek. Mohon tunggu maksimal 1 x 5 jam. Terima kasih.\n".$this->kembali.$this->awal;
 
 					}
 
