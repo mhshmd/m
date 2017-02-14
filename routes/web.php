@@ -17,6 +17,8 @@ use Illuminate\Http\Response;
 
 Route::post('/bot', 'LINEBotController@bot')->name('bot');
 
+Route::get('/push', 'LINEBotController@push')->name('bot');
+
 Route::get('/', 'HomeController@index')->name('home');
 Route::get('/monitor', 'HomeController@monitor');
 Route::get('/test', function () {

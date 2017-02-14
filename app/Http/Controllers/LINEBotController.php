@@ -10,6 +10,7 @@ use App\Http\Controllers\Controller;
 use App\Libraries\LINE\LINEBot;
 use App\Libraries\LINE\SignatureValidator;
 use App\Libraries\LINE\LINEBot\HTTPClient\CurlHTTPClient;
+use App\Libraries\LINE\LINEBot\MessageBuilder\TextMessageBuilder;
 //KuotaWA
 use App\Libraries\KuotaWA\MenuAbstract;
 use App\Libraries\KuotaWA\MenuAwal;
@@ -125,6 +126,21 @@ c1e97f1d72e19a6d30302ada807611e1"]);
 		    }
 
 		}
+
+    }
+
+    public function push()
+    {
+
+    	$httpClient = new CurlHTTPClient("CdKB3m7TTrjK3kRZqTZuYay0GyybS6chWnWG468GunvL3UEF+wDzbP3WBrUhU3OeGBLqcvHDy3Hhgzl67iMPzqDGSeZwe6ZiyNMllbLNCQ+LKSf4Vs3NJqkeQEEiAjnkjCB6YFOFzY86grEYIwfhrAdB04t89/1O/w1cDnyilFU=");
+
+		$bot = new LINEBot($httpClient, ['channelSecret' => 'c1e97f1d72e19a6d30302ada807611e1']);
+
+		$textMessageBuilder = new TextMessageBuilder('hello');
+
+		$response = $bot->pushMessage('U8b44000759f9acd2ce3e7cdb2d1b8b50', $textMessageBuilder);
+
+		echo $response->getHTTPStatus() . ' ' . $response->getRawBody();
 
     }
 
