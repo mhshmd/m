@@ -14,6 +14,11 @@ use App\Libraries\KuotaWA\PreOrder;
 use App\Libraries\KuotaWA\Keranjang;
 use App\Libraries\KuotaWA\WACommand;
 use App\Libraries\KuotaWA\SMSCommand;
+//LINEBot
+use App\Libraries\LINE\LINEBot;
+use App\Libraries\LINE\SignatureValidator;
+use App\Libraries\LINE\LINEBot\HTTPClient\CurlHTTPClient;
+use App\Libraries\LINE\LINEBot\MessageBuilder\TextMessageBuilder;
 //XMPPHP
 use App\Libraries\XMPPHP\XMPPHP_XMPP;
 //EnvayaSMS
@@ -49,6 +54,26 @@ class KuotaController extends Controller
                 $result = Transaksi::where([['id', $id[0][0]]])->update(['status'=>1]);
 
                 if($result){
+
+                    $sender = Transaksi::where([['id', $id[0][0]]])->select('sender', 'kode')->first();
+
+                    if(strlen($sender['sender'])>20){
+
+                        $httpClient = new CurlHTTPClient("CdKB3m7TTrjK3kRZqTZuYay0GyybS6chWnWG468GunvL3UEF+wDzbP3WBrUhU3OeGBLqcvHDy3Hhgzl67iMPzqDGSeZwe6ZiyNMllbLNCQ+LKSf4Vs3NJqkeQEEiAjnkjCB6YFOFzY86grEYIwfhrAdB04t89/1O/w1cDnyilFU=");
+
+                        $bot = new LINEBot($httpClient, ['channelSecret' => 'c1e97f1d72e19a6d30302ada807611e1']);
+
+                        // $opName = Kuota::where([['kode', $sender['kode']]])->value('operatorName');
+
+                        $messagge = "Kuota ID #".$id[0][0]." berhasil dikirim. Terima kasih.";
+
+                        $textMessageBuilder = new TextMessageBuilder($messagge);
+
+                        $response = $bot->pushMessage($sender['sender'], $textMessageBuilder);
+
+                        // echo $response->getHTTPStatus() . ' ' . $response->getRawBody();
+
+                    }
 
                     return "ID #".$id[0][0]." berhasil diubah";
 

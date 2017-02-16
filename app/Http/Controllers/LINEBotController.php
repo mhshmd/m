@@ -121,7 +121,41 @@ c1e97f1d72e19a6d30302ada807611e1"]);
 
 					return $result->getHTTPStatus() . ' ' . $result->getRawBody();
 
-			    }
+			    } else{
+
+			    	$result = $bot->replyText($event['replyToken'], "Mohon masukkan pilihan Anda lagi.");
+
+					return $result->getHTTPStatus() . ' ' . $result->getRawBody();
+
+				}
+
+		    } elseif ($event['type'] == 'follow') {
+
+		    	// send same message as reply to user
+
+			        $wa = new WACommand("0", $event['source']['userId']);
+
+			        # Inisial Menu
+
+			        $menuAwal = new MenuAwal(0, 'Menu awal');
+
+			        $kuota = new MenuKuota(1, 'Kuota', $wa->getFrom());
+
+			        //$preOrder = new PreOrder(2, 'Pre-order (16-18 Jan)', $wa->getFrom());
+			        
+			        $keranjang = new Keranjang(2, 'Keranjang belanja', $wa->getFrom());
+
+			        # Tambah Menu ke Menu Awal
+
+			        $menuAwal->addSubMenu($kuota);
+			        
+			        $menuAwal->addSubMenu($keranjang);
+
+			        $reply = preg_replace("/\*/", "",$menuAwal->run($wa));
+
+			        $result = $bot->replyText($event['replyToken'], $reply);
+
+					return $result->getHTTPStatus() . ' ' . $result->getRawBody();
 
 		    }
 
@@ -136,7 +170,9 @@ c1e97f1d72e19a6d30302ada807611e1"]);
 
 		$bot = new LINEBot($httpClient, ['channelSecret' => 'c1e97f1d72e19a6d30302ada807611e1']);
 
-		$messagge = "\u{100075}Promo hari ini: Indosat 2GB + 5GB 4G hanya 30.000\n\n1. Beli\n\n0. Menu awal";
+		$messagge = "Waktu transfer telah kadaluarsa. Terima kasih.";
+
+		$messagge2 = "Kuota berhasil dikirim. Terima kasih.\n\n99. Menu kuota operator\n0. Menu awal";
 
 		$textMessageBuilder = new TextMessageBuilder($messagge);
 

@@ -27,6 +27,7 @@ class Kuota extends Model
         'days',
         'is24jam',
         'expired',
+        'operatorName',
     ];
 
     /**
