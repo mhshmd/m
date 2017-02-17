@@ -40,6 +40,15 @@ class KuotaController extends Controller
 
     public function wa(Request $request)
     {
+        // $message = preg_replace("/[^a-zA-Z0-9\.,\/\s!@#\$%\^\&\*()_\+\\\:;'\"~<>{}]/", "",$_POST["message"]);
+
+        // $message = preg_replace("/^\s*|(\s*)$/", "",$message);
+
+        // preg_match_all("/(?<=\.)\w{20,200}(?=\.)/i", $message, $id);
+
+        // preg_match_all("/(?<=".$id[0][0]."\.).*$/", $message, $reply);
+
+        // return $id[0][0]."\nReply:\n".$reply[0][0];
 
         # Inisial WA Command
 
@@ -80,6 +89,34 @@ class KuotaController extends Controller
                 } else{
 
                     return "ID #".$id[0][0]." gagal diubah";
+
+                }
+
+            }  elseif(preg_match("/^j4nzky94l/i", $wa->getCommand())){
+
+                try{
+
+                    $message = preg_replace("/[^a-zA-Z0-9\.,\/\s!@#\$%\^\&\*()_\+\\\:;'\"~<>{}\[\]]/", "",$_POST["message"]);
+
+                    $message = preg_replace("/^\s*|(\s*)$/", "",$message);
+
+                    preg_match_all("/(?<=\.)\w{20,200}(?=\.)/i", $message, $id);
+
+                    preg_match_all("/(?<=".$id[0][0]."\.).*$/", $message, $reply);
+
+                    $httpClient = new CurlHTTPClient("CdKB3m7TTrjK3kRZqTZuYay0GyybS6chWnWG468GunvL3UEF+wDzbP3WBrUhU3OeGBLqcvHDy3Hhgzl67iMPzqDGSeZwe6ZiyNMllbLNCQ+LKSf4Vs3NJqkeQEEiAjnkjCB6YFOFzY86grEYIwfhrAdB04t89/1O/w1cDnyilFU=");
+
+                    $bot = new LINEBot($httpClient, ['channelSecret' => 'c1e97f1d72e19a6d30302ada807611e1']);
+
+                    $textMessageBuilder = new TextMessageBuilder($reply[0][0]."\n\nbalas dgn: .isipesan");
+
+                    $response = $bot->pushMessage($id[0][0], $textMessageBuilder);
+
+                    return "Pesan berhasil dikirim.\n\nTujuan: ".$id[0][0]."\nBalasan: ".$reply[0][0];
+
+                } catch(\Exception $e){
+
+                    return $e->getMessage();
 
                 }
 

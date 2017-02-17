@@ -21,6 +21,8 @@ use App\Libraries\KuotaWA\WACommand;
 use App\Libraries\KuotaWA\SMSCommand;
 //XMPPHP
 use App\Libraries\XMPPHP\XMPPHP_XMPP;
+#Email
+use App\Libraries\KuotaWA\Email;
 
 #DB
 use App\Operator;
@@ -78,6 +80,24 @@ c1e97f1d72e19a6d30302ada807611e1"]);
 			    if($event['message']['type'] == 'text') {
 
 			        // send same message as reply to user
+
+			        if(preg_match("/^\./i", $event['message']['text'])) {
+
+			        	$mail = new Email("Ask KUIN ".$event['source']['userId'],"Sender: ".$event['source']['userId']."\nPesan: ".$event['message']['text']);
+
+		                if(!$mail->send()){
+
+		                	$result = $bot->replyText($event['replyToken'], "Pesan gagal dikirim. Mohon hubungi kami langsung via sms: 082311897547. Terima kasih");
+
+							return $result->getHTTPStatus() . ' ' . $result->getRawBody();
+
+		                }
+
+			        	$result = $bot->replyText($event['replyToken'], "Pesan Anda berhasil dikirim. Mohon tunggu balasan kami. Terima kasih.");
+
+						return $result->getHTTPStatus() . ' ' . $result->getRawBody();
+
+			        }
 
 			        $wa = new WACommand($event['message']['text'], $event['source']['userId']);
 
