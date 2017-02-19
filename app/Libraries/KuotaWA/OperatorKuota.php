@@ -132,7 +132,7 @@ class OperatorKuota extends MenuAbstract{
 
     	UserQuery::where([['sender', $this->from],['saved',0]])->update(['currentKuotaList'=>serialize($currentKuotaList)]);
 
-        return "*Harga kuota ".$this->name.":*\nharga (total kuota)\n".$response.$this->kembali.$this->awal;
+        return "*Harga kuota ".$this->name.":*\n(pilih utk detail)\n".$response.$this->kembali.$this->awal;
 
 	}
 
