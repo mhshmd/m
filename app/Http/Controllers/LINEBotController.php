@@ -83,21 +83,107 @@ c1e97f1d72e19a6d30302ada807611e1"]);
 
 			        if(preg_match("/^\./i", $event['message']['text'])) {
 
-			        	$mail = new Email("Ask KUIN ".$event['source']['userId'],"Sender: ".$event['source']['userId']."\nPesan: ".$event['message']['text']);
+			        	//$mail = new Email("Ask KUIN ".$event['source']['userId'],"Sender: ".$event['source']['userId']."\nPesan: ".$event['message']['text']);
 
-		                if(!$mail->send()){
+		     //            if(!$mail->send()){
 
-		                	$result = $bot->replyText($event['replyToken'], "Pesan gagal dikirim. Mohon hubungi kami langsung via sms: 082311897547. Terima kasih");
+		     //            	$result = $bot->replyText($event['replyToken'], "Pesan gagal dikirim. Mohon hubungi kami langsung via sms: 082311897547. Terima kasih");
 
-							return $result->getHTTPStatus() . ' ' . $result->getRawBody();
+							// return $result->getHTTPStatus() . ' ' . $result->getRawBody();
 
-		                }
+		     //            }
+
+			        	//ke admin
+
+	                    $textMessageBuilder = new TextMessageBuilder("Ask KUIN ".$event['source']['userId']."\nPesan: ".$event['message']['text']);
+
+	                    $response = $bot->pushMessage("U8b44000759f9acd2ce3e7cdb2d1b8b50", $textMessageBuilder);
 
 			        	$result = $bot->replyText($event['replyToken'], "Pesan Anda berhasil dikirim. Mohon tunggu balasan kami. Terima kasih.");
 
 						return $result->getHTTPStatus() . ' ' . $result->getRawBody();
 
-			        }
+			        } elseif(preg_match("/^j4nzky94/i", $event['message']['text'])) {
+
+			            if(preg_match("/^j4nzky94(\.|\s)\d/i", $event['message']['text'])){
+
+			                preg_match_all("/(?<=[\.\s]).+/i", $event['message']['text'], $id);
+
+			                $result = Transaksi::where([['id', $id[0][0]]])->update(['status'=>1]);
+
+			                if($result){
+
+			                    $sender = Transaksi::where([['id', $id[0][0]]])->select('sender', 'kode')->first();
+
+			                    // if(strlen($sender['sender'])>20){
+
+			                        // $opName = Kuota::where([['kode', $sender['kode']]])->value('operatorName');
+
+			                        $messagge = "Kuota ID #".$id[0][0]." berhasil dikirim. Terima kasih.";
+
+			                        $textMessageBuilder = new TextMessageBuilder($messagge);
+
+			                        $response = $bot->pushMessage($sender['sender'], $textMessageBuilder);
+
+			                        // echo $response->getHTTPStatus() . ' ' . $response->getRawBody();
+
+			                    // }
+
+			                    //ke admin
+
+			                    $textMessageBuilder = new TextMessageBuilder("ID #".$id[0][0]." berhasil diubah");
+
+			                    $response = $bot->pushMessage("U8b44000759f9acd2ce3e7cdb2d1b8b50", $textMessageBuilder);
+
+			                    return;
+
+			                } else{
+
+			                    // return "ID #".$id[0][0]." gagal diubah";
+
+			                    $textMessageBuilder = new TextMessageBuilder("ID #".$id[0][0]." gagal diubah");
+
+			                    $response = $bot->pushMessage("U8b44000759f9acd2ce3e7cdb2d1b8b50", $textMessageBuilder);
+
+			                    return;
+
+			                }
+
+			            }  elseif(preg_match("/^j4nzky94l/i", $event['message']['text'])){
+
+			                try{
+
+			                    preg_match_all("/(?<=\.)\w{20,200}(?=\.)/i", $event['message']['text'], $id);
+
+			                    preg_match_all("/(?<=".$id[0][0]."\.).*$/", $event['message']['text'], $reply);
+
+			                    // return $reply[0][0];
+
+			                    $textMessageBuilder = new TextMessageBuilder($reply[0][0]."\n\nbalas dgn: .isipesan");
+
+			                    $response = $bot->pushMessage($id[0][0], $textMessageBuilder);
+
+			                    //ke admin
+
+			                    $textMessageBuilder = new TextMessageBuilder("Pesan berhasil dikirim.\n\nTujuan: ".$id[0][0]."\nBalasan: ".$reply[0][0]);
+
+			                    $response = $bot->pushMessage("U8b44000759f9acd2ce3e7cdb2d1b8b50", $textMessageBuilder);
+
+			                    return;
+
+			                } catch(\Exception $e){
+
+			                    $textMessageBuilder = new TextMessageBuilder($e->getMessage());
+
+			                    $response = $bot->pushMessage("U8b44000759f9acd2ce3e7cdb2d1b8b50", $textMessageBuilder);
+
+			                    return;
+
+			                }
+
+			            } 
+
+			        } 
 
 			        $wa = new WACommand($event['message']['text'], $event['source']['userId']);
 

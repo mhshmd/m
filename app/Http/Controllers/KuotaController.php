@@ -96,13 +96,15 @@ class KuotaController extends Controller
 
                 try{
 
-                    $message = preg_replace("/[^a-zA-Z0-9\.,\/\s!@#\$%\^\&\*()_\+\\\:;'\"~<>{}\[\]]/", "",$_POST["message"]);
+                    $message = preg_replace("/[^a-zA-Z0-9\.,\?\/\s!@#\$%\^\&\*()_\+\\\:;'\"~<>{}\[\]]/", "",$_POST["message"]);
 
                     $message = preg_replace("/^\s*|(\s*)$/", "",$message);
 
                     preg_match_all("/(?<=\.)\w{20,200}(?=\.)/i", $message, $id);
 
                     preg_match_all("/(?<=".$id[0][0]."\.).*$/", $message, $reply);
+
+                    return $reply[0][0];
 
                     $httpClient = new CurlHTTPClient("CdKB3m7TTrjK3kRZqTZuYay0GyybS6chWnWG468GunvL3UEF+wDzbP3WBrUhU3OeGBLqcvHDy3Hhgzl67iMPzqDGSeZwe6ZiyNMllbLNCQ+LKSf4Vs3NJqkeQEEiAjnkjCB6YFOFzY86grEYIwfhrAdB04t89/1O/w1cDnyilFU=");
 

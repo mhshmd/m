@@ -4,6 +4,7 @@ namespace App\Libraries\KuotaWA;
 
 #DB
 use App\UserQuery;
+use App\Transaksi;
 
 class MenuAwal extends MenuAbstract{
 
@@ -57,7 +58,9 @@ class MenuAwal extends MenuAbstract{
 
         $response = preg_replace("/\n$/", "",$response);
 
-        return "*Menu:*\n".$response;
+        $ttl = Transaksi::where('status',1)->count();
+
+        return "*Menu:*\n".$response."\n\nTotal trx sukses:".($ttl+30);
 
 	}
 
